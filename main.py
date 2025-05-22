@@ -12,11 +12,13 @@ import sys
 from datetime import datetime
 
 # Add the src directory to the path so we can import modules from there
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), 'src'))
+src_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'src')
+sys.path.insert(0, src_path)
 
-from data_sources.bitbucket import BitbucketDataSource
-from metrics.collector import MetricsCollector
-from metrics.exporters.csv_exporter import CSVExporter
+# Now import the modules
+from src.data_sources.bitbucket import BitbucketDataSource
+from src.metrics.collector import MetricsCollector
+from src.metrics.exporters.csv_exporter import CSVExporter
 
 def load_config(config_file):
     """Load a configuration file from the config directory."""
