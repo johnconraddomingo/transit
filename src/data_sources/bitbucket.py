@@ -13,20 +13,37 @@ class BitbucketDataSource:
     Data source for connecting to a Bitbucket server and retrieving metrics.
     """
     
-    def __init__(self, base_url, token):
+    def __init__(self, base_url, token=None, username=None, password=None):
         """
         Initialize the BitbucketDataSource.
         
         Args:
             base_url (str): Base URL of the Bitbucket server
-            token (str): Authentication token for API access
+            token (str, optional): Authentication token for API access
+            username (str, optional): Username for basic authentication
+            password (str, optional): Password for basic authentication
+        
+        Note:
+            Either token OR username/password must be provided for authentication.
         """
         self.base_url = base_url.rstrip('/')
         self.token = token
+        self.username = username
+        self.password = password
+        
+        # Set up authentication headers
         self.headers = {
-            'Authorization': f'Bearer {token}',
             'Accept': 'application/json'
         }
+        
+        # Set up authentication method
+        if token:
+            self.headers['Authorization'] = f'Bearer {token}'
+            self.auth = None
+        elif username and password:
+            self.auth = (username, password)
+        else:
+            raise ValueError("Either token or username/password must be provided for authentication")
     
     def get_merged_prs(self, project_path, year, month):
         """
@@ -67,7 +84,11 @@ class BitbucketDataSource:
         }
         
         try:
-            response = requests.get(url, headers=self.headers, params=params)
+            if self.auth:
+                response = requests.get(url, headers=self.headers, params=params, auth=self.auth)
+            else:
+                response = requests.get(url, headers=self.headers, params=params)
+                
             response.raise_for_status()
             data = response.json()
             

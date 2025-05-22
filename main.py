@@ -56,16 +56,34 @@ def main():
     # Load configurations
     projects_config = load_config('projects.json')
     servers_config = load_config('servers.json')
-    tokens_config = load_config('tokens.json')
+    auth_config = load_config('tokens.json')
     
     # Create metrics collector
     collector = MetricsCollector()
     
     # Register data sources
-    bitbucket_source = BitbucketDataSource(
-        base_url=servers_config['servers']['bitbucket'],
-        token=tokens_config['tokens']['bitbucket']
-    )
+    # Create Bitbucket data source with appropriate authentication
+    bitbucket_auth = auth_config.get('bitbucket', {})
+    
+    # Determine authentication method for Bitbucket
+    if 'token' in bitbucket_auth and bitbucket_auth['token']:
+        # Token authentication
+        bitbucket_source = BitbucketDataSource(
+            base_url=servers_config['servers']['bitbucket'],
+            token=bitbucket_auth['token']
+        )
+    elif 'username' in bitbucket_auth and 'password' in bitbucket_auth:
+        # Username/password authentication
+        bitbucket_source = BitbucketDataSource(
+            base_url=servers_config['servers']['bitbucket'],
+            username=bitbucket_auth['username'],
+            password=bitbucket_auth['password']
+        )
+    else:
+        print("Error: No valid authentication method found for Bitbucket.")
+        print("Please provide either 'token' or 'username' and 'password' in tokens.json")
+        sys.exit(1)
+        
     collector.register_data_source('bitbucket', bitbucket_source)
     
     # Collect metrics for all projects

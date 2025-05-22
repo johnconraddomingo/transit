@@ -23,11 +23,23 @@ This Python application collects various metrics for a specified month across pr
    }
    ```
 
-3. Configure your access tokens in `config/tokens.json`:
+3. Configure your authentication in `config/tokens.json`:
+   
+   You can use either token-based authentication:
    ```json
    {
-       "tokens": {
-           "bitbucket": "YOUR_TOKEN_HERE"
+       "bitbucket": {
+           "token": "YOUR_TOKEN_HERE"
+       }
+   }
+   ```
+   
+   Or username/password authentication:
+   ```json
+   {
+       "bitbucket": {
+           "username": "YOUR_USERNAME",
+           "password": "YOUR_PASSWORD"
        }
    }
    ```
