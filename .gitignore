@@ -1,6 +1,7 @@
 # Python bytecode files
 __pycache__/
 src/data_sources/__pycache__
+src/metrics/__pycache__
 *.py[cod]
 *$py.class
 

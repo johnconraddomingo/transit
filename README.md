@@ -18,18 +18,21 @@ This Python application collects various metrics for a specified month across pr
    ```json
    {
        "servers": {
-           "bitbucket": "https://bitbucket.int.corp.sun"
+           "bitbucket": "https://bitbucket.int.corp.sun",
+           "sonarqube": "https://sonarqube.int.corp.sun"
        }
    }
    ```
 
 3. Configure your authentication in `config/tokens.json`:
-   
-   You can use either token-based authentication:
+     You can use either token-based authentication:
    ```json
    {
        "bitbucket": {
            "token": "YOUR_TOKEN_HERE"
+       },
+       "sonarqube": {
+           "token": "YOUR_SONARQUBE_TOKEN"
        }
    }
    ```
@@ -40,6 +43,10 @@ This Python application collects various metrics for a specified month across pr
        "bitbucket": {
            "username": "YOUR_USERNAME",
            "password": "YOUR_PASSWORD"
+       },
+       "sonarqube": {
+           "username": "YOUR_SONARQUBE_USERNAME",
+           "password": "YOUR_SONARQUBE_PASSWORD"
        }
    }
    ```
@@ -64,7 +71,8 @@ The metrics are saved in CSV format in the `ongoing` directory with the filename
 
 Sample contents:
 ```
-merged_pr,123
+s_merged_prs,123
+q_bugs,45
 ```
 
 ## Adding New Metrics

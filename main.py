@@ -17,6 +17,7 @@ sys.path.insert(0, src_path)
 
 # Now import the modules
 from src.data_sources.bitbucket import BitbucketDataSource
+from src.data_sources.sonarqube import SonarQubeDataSource
 from src.metrics.collector import MetricsCollector
 from src.metrics.exporters.csv_exporter import CSVExporter
 
@@ -62,8 +63,7 @@ def main():
     
     # Create metrics collector
     collector = MetricsCollector()
-    
-    # Register data sources
+      # Register data sources
     # Create Bitbucket data source with appropriate authentication
     bitbucket_auth = auth_config.get('bitbucket', {})
     
@@ -85,21 +85,48 @@ def main():
         print("Error: No valid authentication method found for Bitbucket.")
         print("Please provide either 'token' or 'username' and 'password' in tokens.json")
         sys.exit(1)
-        
+    
+    # Register Bitbucket data source
     collector.register_data_source('bitbucket', bitbucket_source)
     
-    # Collect metrics for all projects
+    # Create SonarQube data source with appropriate authentication
+    sonarqube_auth = auth_config.get('sonarqube', {})
+    
+    # Determine authentication method for SonarQube
+    if 'token' in sonarqube_auth and sonarqube_auth['token']:
+        # Token authentication
+        sonarqube_source = SonarQubeDataSource(
+            base_url=servers_config['servers']['sonarqube'],
+            token=sonarqube_auth['token']
+        )
+    elif 'username' in sonarqube_auth and 'password' in sonarqube_auth:
+        # Username/password authentication
+        sonarqube_source = SonarQubeDataSource(
+            base_url=servers_config['servers']['sonarqube'],
+            username=sonarqube_auth['username'],
+            password=sonarqube_auth['password']
+        )
+    else:
+        print("Error: No valid authentication method found for SonarQube.")
+        print("Please provide either 'token' or 'username' and 'password' in tokens.json")
+        sys.exit(1)
+    
+    # Register SonarQube data source
+    collector.register_data_source('sonarqube', sonarqube_source)
+      # Collect metrics for all projects
     results = {}
     for project in projects_config['projects']:
         print(f"Collecting metrics for project: {project}")
         
-        # Collect merged PRs - this will automatically use the bitbucket datasource
-        merged_prs = collector.collect_metric('merged_pr', project, year, month)
-        
         if project not in results:
             results[project] = {}
-        
-        results[project]['merged_pr'] = merged_prs
+          # Collect merged PRs - this will automatically use the bitbucket datasource
+        merged_prs = collector.collect_metric('merged_pr', project, year, month)
+        results[project]['s_merged_prs'] = merged_prs
+          # Collect bugs from SonarQube - this will automatically use the sonarqube datasource
+        # For SonarQube, we use the same project identifier as it should match the SonarQube project key
+        bugs = collector.collect_metric('bugs', project, year, month)
+        results[project]['q_bugs'] = bugs
     
     # Export results to CSV
     exporter = CSVExporter()

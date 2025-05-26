@@ -1,5 +1,6 @@
 {
     "servers": {
-        "bitbucket": "https://bitbucket.int.corp.sun"
+        "bitbucket": "https://bitbucket.int.corp.sun",
+        "sonarqube": "https://sonarqube.int.corp.sun"
     }
 }

@@ -12,7 +12,8 @@ class MetricsCollector:
         """Initialize the MetricsCollector with empty data sources and mappings."""
         self.data_sources = {}
         self.metric_mappings = {
-            'merged_pr': ('bitbucket', 'get_merged_prs')
+            'merged_pr': ('bitbucket', 'get_merged_prs'),
+            'bugs': ('sonarqube', 'get_bugs')
         }
     
     def register_data_source(self, name, data_source):
