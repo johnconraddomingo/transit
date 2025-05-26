@@ -1,0 +1,17 @@
+a_active_users,1380
+a_ai_adoption_rate,0.45
+a_ai_usage,0.30
+a_code_suggestions,850
+a_code_accepted,1040
+s_merged_prs,420
+s_pr_review_time,920
+s_story_points,340
+q_code_smells,2350
+q_coverage,0.50
+q_bugs,300
+q_vulnerabilities,53
+e_user_satisfaction,0.82
+e_adoption,0.40
+e_productivity,0.75
+e_use_cases,18
+d_deployment_frequency,3.5
