@@ -14,15 +14,23 @@ This Python application collects various metrics for a specified month across pr
    }
    ```
 
-2. Configure your server URLs in `config/servers.json`:
+2. Configure your server URLs and data source availability in `config/servers.json`:
    ```json
    {
        "servers": {
-           "bitbucket": "https://bitbucket.int.corp.sun",
-           "sonarqube": "https://sonarqube.int.corp.sun"
+           "bitbucket": {
+               "url": "https://bitbucket.int.corp.sun",
+               "enabled": true
+           },
+           "sonarqube": {
+               "url": "https://sonarqube.int.corp.sun",
+               "enabled": true
+           }
        }
    }
    ```
+   
+   You can set `enabled` to `false` for any data source you want to disable. The application will skip collecting metrics from disabled data sources.
 
 3. Configure your authentication in `config/tokens.json`:
      You can use either token-based authentication:

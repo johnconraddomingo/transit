@@ -1,6 +1,12 @@
 {
     "servers": {
-        "bitbucket": "https://bitbucket.int.corp.sun",
-        "sonarqube": "https://sonarqube.int.corp.sun"
+        "bitbucket": {
+            "url": "https://bitbucket.int.corp.sun",
+            "enabled": true
+        },
+        "sonarqube": {
+            "url": "https://sonarqube.int.corp.sun",
+            "enabled": true
+        }
     }
 }

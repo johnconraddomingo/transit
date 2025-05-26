@@ -50,70 +50,34 @@ def main():
     
     # Validate year_month format
     if not validate_year_month(args.year_month):
-        print(f"Error: Invalid year-month format: {args.year_month}. Expected format: YYYY-MM (e.g. 2025-05)")
+        print(f"Error: Invalid year-month format. Expected YYYY-MM, got {args.year_month}")
         sys.exit(1)
-    
-    # Extract year and month for later use
-    year, month = args.year_month.split('-')
     
     # Load configurations
     projects_config = load_config('projects.json')
     servers_config = load_config('servers.json')
-    auth_config = load_config('tokens.json')
+    tokens_config = load_config('tokens.json')
     
-    # Create metrics collector
+    # Initialize collector
     collector = MetricsCollector()
-      # Register data sources
-    # Create Bitbucket data source with appropriate authentication
-    bitbucket_auth = auth_config.get('bitbucket', {})
     
-    # Determine authentication method for Bitbucket
-    if 'token' in bitbucket_auth and bitbucket_auth['token']:
-        # Token authentication
-        bitbucket_source = BitbucketDataSource(
-            base_url=servers_config['servers']['bitbucket'],
-            token=bitbucket_auth['token']
-        )
-    elif 'username' in bitbucket_auth and 'password' in bitbucket_auth:
-        # Username/password authentication
-        bitbucket_source = BitbucketDataSource(
-            base_url=servers_config['servers']['bitbucket'],
-            username=bitbucket_auth['username'],
-            password=bitbucket_auth['password']
-        )
-    else:
-        print("Error: No valid authentication method found for Bitbucket.")
-        print("Please provide either 'token' or 'username' and 'password' in tokens.json")
-        sys.exit(1)
+    # Initialize enabled data sources
+    if servers_config['servers']['bitbucket'].get('enabled', True):
+        bitbucket_url = servers_config['servers']['bitbucket']['url']
+        bitbucket_auth = tokens_config.get('bitbucket', {})
+        bitbucket = BitbucketDataSource(bitbucket_url, **bitbucket_auth)
+        collector.register_data_source('bitbucket', bitbucket)
+        
+    if servers_config['servers']['sonarqube'].get('enabled', True):
+        sonarqube_url = servers_config['servers']['sonarqube']['url']
+        sonarqube_auth = tokens_config.get('sonarqube', {})
+        sonarqube = SonarQubeDataSource(sonarqube_url, **sonarqube_auth)
+        collector.register_data_source('sonarqube', sonarqube)
     
-    # Register Bitbucket data source
-    collector.register_data_source('bitbucket', bitbucket_source)
+    # Extract year and month for later use
+    year, month = args.year_month.split('-')
     
-    # Create SonarQube data source with appropriate authentication
-    sonarqube_auth = auth_config.get('sonarqube', {})
-    
-    # Determine authentication method for SonarQube
-    if 'token' in sonarqube_auth and sonarqube_auth['token']:
-        # Token authentication
-        sonarqube_source = SonarQubeDataSource(
-            base_url=servers_config['servers']['sonarqube'],
-            token=sonarqube_auth['token']
-        )
-    elif 'username' in sonarqube_auth and 'password' in sonarqube_auth:
-        # Username/password authentication
-        sonarqube_source = SonarQubeDataSource(
-            base_url=servers_config['servers']['sonarqube'],
-            username=sonarqube_auth['username'],
-            password=sonarqube_auth['password']
-        )
-    else:
-        print("Error: No valid authentication method found for SonarQube.")
-        print("Please provide either 'token' or 'username' and 'password' in tokens.json")
-        sys.exit(1)
-    
-    # Register SonarQube data source
-    collector.register_data_source('sonarqube', sonarqube_source)
-      # Collect metrics for all projects
+    # Collect metrics for all projects
     results = {}
     for project in projects_config['projects']:
         print(f"Collecting metrics for project: {project}")
