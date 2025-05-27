@@ -18,6 +18,7 @@ sys.path.insert(0, src_path)
 # Now import the modules
 from src.data_sources.bitbucket import BitbucketDataSource
 from src.data_sources.sonarqube import SonarQubeDataSource
+from src.data_sources.jira import JiraDataSource
 from src.metrics.collector import MetricsCollector
 from src.metrics.exporters.csv_exporter import CSVExporter
 
@@ -73,6 +74,12 @@ def main():
         sonarqube_auth = tokens_config.get('sonarqube', {})
         sonarqube = SonarQubeDataSource(sonarqube_url, **sonarqube_auth)
         collector.register_data_source('sonarqube', sonarqube)
+        
+    if servers_config['servers']['jira'].get('enabled', True):
+        jira_url = servers_config['servers']['jira']['url']
+        jira_auth = tokens_config.get('jira', {})
+        jira = JiraDataSource(jira_url, **jira_auth)
+        collector.register_data_source('jira', jira)
     
     # Extract year and month for later use
     year, month = args.year_month.split('-')
@@ -87,10 +94,13 @@ def main():
           # Collect merged PRs - this will automatically use the bitbucket datasource
         merged_prs = collector.collect_metric('merged_pr', project, year, month)
         results[project]['s_merged_prs'] = merged_prs
-          # Collect bugs from SonarQube - this will automatically use the sonarqube datasource
-        # For SonarQube, we use the same project identifier as it should match the SonarQube project key
+          # Collect bugs from SonarQube - this will automatically use the sonarqube datasource        # For SonarQube, we use the same project identifier as it should match the SonarQube project key
         bugs = collector.collect_metric('bugs', project, year, month)
         results[project]['q_bugs'] = bugs
+        
+        # Collect story points from JIRA
+        story_points = collector.collect_metric('story_points', project, year, month)
+        results[project]['s_story_points'] = story_points
     
     # Export results to CSV
     exporter = CSVExporter()

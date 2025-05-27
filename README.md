@@ -34,14 +34,17 @@ You'll know the virtual environment is activated when you see `(venv)` at the be
 
 2. Configure your server URLs and data source availability in `config/servers.json`:
    ```json
-   {
-       "servers": {
+   {       "servers": {
            "bitbucket": {
                "url": "https://bitbucket.int.corp.sun",
                "enabled": true
            },
            "sonarqube": {
                "url": "https://sonar.int.corp.sun",
+               "enabled": true
+           },
+           "jira": {
+               "url": "https://jira.int.corp.sun",
                "enabled": true
            }
        }
@@ -52,18 +55,19 @@ You'll know the virtual environment is activated when you see `(venv)` at the be
 
 3. Configure your authentication in `config/tokens.json`:
      You can use either token-based authentication:
-   ```json
-   {
+   ```json   {
        "bitbucket": {
            "token": "YOUR_TOKEN_HERE"
        },
        "sonarqube": {
            "token": "YOUR_SONARQUBE_TOKEN"
+       },
+       "jira": {
+           "token": "YOUR_JIRA_TOKEN"
        }
    }
    ```
-   
-   Or username/password authentication:
+     Or username/password authentication:
    ```json
    {
        "bitbucket": {
@@ -73,6 +77,10 @@ You'll know the virtual environment is activated when you see `(venv)` at the be
        "sonarqube": {
            "username": "YOUR_SONARQUBE_USERNAME",
            "password": "YOUR_SONARQUBE_PASSWORD"
+       },
+       "jira": {
+           "username": "YOUR_JIRA_USERNAME",
+           "password": "YOUR_JIRA_PASSWORD"
        }
    }
    ```
@@ -99,6 +107,7 @@ Sample contents:
 ```
 s_merged_prs,123
 q_bugs,45
+s_story_points,89
 ```
 
 ## Adding New Metrics

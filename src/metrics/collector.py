@@ -7,13 +7,13 @@ class MetricsCollector:
     Collector for metrics from various data sources.
     This class manages the data sources and maps metric types to the appropriate sources.
     """
-    
     def __init__(self):
         """Initialize the MetricsCollector with empty data sources and mappings."""
         self.data_sources = {}
         self.metric_mappings = {
             'merged_pr': ('bitbucket', 'get_merged_prs'),
-            'bugs': ('sonarqube', 'get_bugs')
+            'bugs': ('sonarqube', 'get_bugs'),
+            'story_points': ('jira', 'get_story_points')
         }
     
     def register_data_source(self, name, data_source):
