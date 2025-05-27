@@ -126,10 +126,9 @@ def main():
         org_name = project.split('/')[0]  # Extract organization name from project path
         active_users = collector.collect_metric('active_users', org_name, year, month)
         results[project]['a_active_users'] = active_users
-    
-    # Export results to CSV
+      # Export results to CSV
     exporter = CSVExporter()
-    output_path = os.path.join(os.path.dirname(__file__), 'ongoing', args.year_month)
+    output_path = os.path.join(os.path.dirname(__file__), 'ongoing', f"{args.year_month}.csv")
     exporter.export(results, output_path)
     
     print(f"Metrics collection completed. Results exported to {output_path}")

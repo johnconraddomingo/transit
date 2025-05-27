@@ -120,10 +120,10 @@ This will collect metrics for May 2025 for all projects defined in the configura
 
 ## Output
 
-The metrics are saved in CSV format in the `ongoing` directory with the filename matching the year-month parameter:
+The metrics are saved in CSV format in the `ongoing` directory with the filename matching the year-month parameter and a .csv extension:
 
 ```
-/ongoing/2025-05
+/ongoing/2025-05.csv
 ```
 
 Sample contents:
