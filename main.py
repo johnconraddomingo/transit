@@ -19,6 +19,7 @@ sys.path.insert(0, src_path)
 from src.data_sources.bitbucket import BitbucketDataSource
 from src.data_sources.sonarqube import SonarQubeDataSource
 from src.data_sources.jira import JiraDataSource
+from src.data_sources.jenkins import JenkinsDataSource
 from src.metrics.collector import MetricsCollector
 from src.metrics.exporters.csv_exporter import CSVExporter
 
@@ -80,6 +81,12 @@ def main():
         jira_auth = tokens_config.get('jira', {})
         jira = JiraDataSource(jira_url, **jira_auth)
         collector.register_data_source('jira', jira)
+        
+    if servers_config['servers']['jenkins'].get('enabled', True):
+        jenkins_url = servers_config['servers']['jenkins']['url']
+        jenkins_auth = tokens_config.get('jenkins', {})
+        jenkins = JenkinsDataSource(jenkins_url, **jenkins_auth)
+        collector.register_data_source('jenkins', jenkins)
     
     # Extract year and month for later use
     year, month = args.year_month.split('-')
@@ -97,10 +104,16 @@ def main():
           # Collect bugs from SonarQube - this will automatically use the sonarqube datasource        # For SonarQube, we use the same project identifier as it should match the SonarQube project key
         bugs = collector.collect_metric('bugs', project, year, month)
         results[project]['q_bugs'] = bugs
-        
-        # Collect story points from JIRA
+          # Collect story points from JIRA
         story_points = collector.collect_metric('story_points', project, year, month)
         results[project]['s_story_points'] = story_points
+        
+        # Process each deployment from the deployments configuration
+        if 'deployments' in projects_config:
+            for deployment in projects_config['deployments']:
+                # Collect deployment frequency from Jenkins
+                deployment_freq = collector.collect_metric('deployment_frequency', deployment, year, month)
+                results[project]['d_deployment_frequency'] = deployment_freq
     
     # Export results to CSV
     exporter = CSVExporter()

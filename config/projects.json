@@ -1,5 +1,9 @@
 {
     "projects": [
         "EPI/github-copilot-training"
+    ],
+    "deployments": [
+        "EPI/github-copilot-training/main",
+        "EPI/github-copilot-training/deploy-prod"
     ]
 }

@@ -11,6 +11,10 @@
         "jira": {
             "url": "https://jira.int.corp.sun",
             "enabled": true
+        },
+        "jenkins": {
+            "url": "https://alfred.int.corp.sun",
+            "enabled": true
         }
     }
 }

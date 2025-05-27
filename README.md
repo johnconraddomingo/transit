@@ -23,11 +23,14 @@ pip install -r requirements.txt
 You'll know the virtual environment is activated when you see `(venv)` at the beginning of your terminal prompt.
 
 1. Configure your projects in `config/projects.json`:
-   ```json
-   {
+   ```json   {
        "projects": [
            "EPI/github-copilot-training",
            "PROJECT2/REPO2"
+       ],
+       "deployments": [
+           "EPI/github-copilot-training/main",
+           "EPI/github-copilot-training/deploy-prod"
        ]
    }
    ```
@@ -42,9 +45,12 @@ You'll know the virtual environment is activated when you see `(venv)` at the be
            "sonarqube": {
                "url": "https://sonar.int.corp.sun",
                "enabled": true
-           },
-           "jira": {
+           },           "jira": {
                "url": "https://jira.int.corp.sun",
+               "enabled": true
+           },
+           "jenkins": {
+               "url": "https://jenkins.int.corp.sun",
                "enabled": true
            }
        }
@@ -61,9 +67,13 @@ You'll know the virtual environment is activated when you see `(venv)` at the be
        },
        "sonarqube": {
            "token": "YOUR_SONARQUBE_TOKEN"
-       },
+       },       
        "jira": {
            "token": "YOUR_JIRA_TOKEN"
+       },
+       "jenkins": {
+           "token": "YOUR_JENKINS_API_TOKEN",
+           "username": "YOUR_JENKINS_USERNAME"
        }
    }
    ```
@@ -77,10 +87,13 @@ You'll know the virtual environment is activated when you see `(venv)` at the be
        "sonarqube": {
            "username": "YOUR_SONARQUBE_USERNAME",
            "password": "YOUR_SONARQUBE_PASSWORD"
-       },
-       "jira": {
+       },       "jira": {
            "username": "YOUR_JIRA_USERNAME",
            "password": "YOUR_JIRA_PASSWORD"
+       },
+       "jenkins": {
+           "username": "YOUR_JENKINS_USERNAME",
+           "password": "YOUR_JENKINS_PASSWORD"
        }
    }
    ```
@@ -108,6 +121,7 @@ Sample contents:
 s_merged_prs,123
 q_bugs,45
 s_story_points,89
+d_deployment_frequency,12
 ```
 
 ## Adding New Metrics
