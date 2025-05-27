@@ -4,6 +4,24 @@ This Python application collects various metrics for a specified month across pr
 
 ## Setup
 
+Create and activate a virtual environment, then install the required dependencies:
+
+Windows:
+```powershell
+python -m venv venv
+.\venv\Scripts\Activate
+pip install -r requirements.txt
+```
+
+Unix/macOS:
+```bash
+python3 -m venv venv
+source venv/bin/activate
+pip install -r requirements.txt
+```
+
+You'll know the virtual environment is activated when you see `(venv)` at the beginning of your terminal prompt.
+
 1. Configure your projects in `config/projects.json`:
    ```json
    {
