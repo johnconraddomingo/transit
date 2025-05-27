@@ -20,6 +20,7 @@ from src.data_sources.bitbucket import BitbucketDataSource
 from src.data_sources.sonarqube import SonarQubeDataSource
 from src.data_sources.jira import JiraDataSource
 from src.data_sources.jenkins import JenkinsDataSource
+from src.data_sources.github import GitHubDataSource
 from src.metrics.collector import MetricsCollector
 from src.metrics.exporters.csv_exporter import CSVExporter
 
@@ -75,18 +76,24 @@ def main():
         sonarqube_auth = tokens_config.get('sonarqube', {})
         sonarqube = SonarQubeDataSource(sonarqube_url, **sonarqube_auth)
         collector.register_data_source('sonarqube', sonarqube)
-        
+          
     if servers_config['servers']['jira'].get('enabled', True):
         jira_url = servers_config['servers']['jira']['url']
         jira_auth = tokens_config.get('jira', {})
         jira = JiraDataSource(jira_url, **jira_auth)
         collector.register_data_source('jira', jira)
-        
+          
     if servers_config['servers']['jenkins'].get('enabled', True):
         jenkins_url = servers_config['servers']['jenkins']['url']
         jenkins_auth = tokens_config.get('jenkins', {})
         jenkins = JenkinsDataSource(jenkins_url, **jenkins_auth)
         collector.register_data_source('jenkins', jenkins)
+        
+    if servers_config['servers']['github'].get('enabled', True):
+        github_url = servers_config['servers']['github']['url']
+        github_auth = tokens_config.get('github', {})
+        github = GitHubDataSource(github_url, **github_auth)
+        collector.register_data_source('github', github)
     
     # Extract year and month for later use
     year, month = args.year_month.split('-')
@@ -107,13 +114,18 @@ def main():
           # Collect story points from JIRA
         story_points = collector.collect_metric('story_points', project, year, month)
         results[project]['s_story_points'] = story_points
-        
-        # Process each deployment from the deployments configuration
+          # Process each deployment from the deployments configuration
         if 'deployments' in projects_config:
             for deployment in projects_config['deployments']:
                 # Collect deployment frequency from Jenkins
                 deployment_freq = collector.collect_metric('deployment_frequency', deployment, year, month)
                 results[project]['d_deployment_frequency'] = deployment_freq
+        
+        # Collect active GitHub Copilot users
+        # For GitHub metrics, we'll use the organization name from the project
+        org_name = project.split('/')[0]  # Extract organization name from project path
+        active_users = collector.collect_metric('active_users', org_name, year, month)
+        results[project]['a_active_users'] = active_users
     
     # Export results to CSV
     exporter = CSVExporter()

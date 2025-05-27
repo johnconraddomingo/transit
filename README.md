@@ -48,9 +48,12 @@ You'll know the virtual environment is activated when you see `(venv)` at the be
            },           "jira": {
                "url": "https://jira.int.corp.sun",
                "enabled": true
-           },
-           "jenkins": {
+           },           "jenkins": {
                "url": "https://jenkins.int.corp.sun",
+               "enabled": true
+           },
+           "github": {
+               "url": "https://api.github.com",
                "enabled": true
            }
        }
@@ -70,10 +73,12 @@ You'll know the virtual environment is activated when you see `(venv)` at the be
        },       
        "jira": {
            "token": "YOUR_JIRA_TOKEN"
-       },
-       "jenkins": {
+       },       "jenkins": {
            "token": "YOUR_JENKINS_API_TOKEN",
            "username": "YOUR_JENKINS_USERNAME"
+       },
+       "github": {
+           "token": "YOUR_GITHUB_PERSONAL_ACCESS_TOKEN"
        }
    }
    ```
@@ -90,13 +95,18 @@ You'll know the virtual environment is activated when you see `(venv)` at the be
        },       "jira": {
            "username": "YOUR_JIRA_USERNAME",
            "password": "YOUR_JIRA_PASSWORD"
-       },
-       "jenkins": {
+       },       "jenkins": {
            "username": "YOUR_JENKINS_USERNAME",
            "password": "YOUR_JENKINS_PASSWORD"
+       },
+       "github": {
+           "username": "YOUR_GITHUB_USERNAME",
+           "password": "YOUR_GITHUB_PASSWORD"
        }
    }
    ```
+   
+   > **Note**: For GitHub, token authentication is strongly recommended as username/password authentication is deprecated for the GitHub API. Use a Personal Access Token with the appropriate scopes.
 
 ## Usage
 
@@ -122,6 +132,7 @@ s_merged_prs,123
 q_bugs,45
 s_story_points,89
 d_deployment_frequency,12
+a_active_users,35
 ```
 
 ## Adding New Metrics
