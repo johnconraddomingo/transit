@@ -41,7 +41,7 @@ You'll know the virtual environment is activated when you see `(venv)` at the be
                "enabled": true
            },
            "sonarqube": {
-               "url": "https://sonarqube.int.corp.sun",
+               "url": "https://sonar.int.corp.sun",
                "enabled": true
            }
        }
