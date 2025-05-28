@@ -1,6 +1,13 @@
-# Project Metrics Collector
+# GitHub Copilot Metrics Framework
 
-This Python application collects various metrics for a specified month across predefined projects.
+This Python application collects
+
+1. **baseline/baseline.csv**: The initial set of measurements or data points collected before implementing changes, serving as a reference point to evaluate the impact and effectiveness of subsequent improvements. This is run once, gathering the average for the months of March, April and May.
+
+2. **ongoing/YYYY-MM.csv**: Continuous data collected after GitHub Copilot’s implementation, enabling comparison against the baseline to evaluate the tool’s impact, track trends over time, and identify areas for further improvement. 
+This is run on a monthly basis and saved with YYYY-MM format.
+
+They are then visualised to demonstrate the impact of GitHub Copilot in Suncorp.
 
 ## Setup
 
