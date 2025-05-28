@@ -183,6 +183,7 @@ The dashboard shows:
 - Current values compared to baseline
 - Percentage change with color-coded indicators (green for positive, red for negative)
 - Historical data for each metric showing month-by-month changes
+- Line graphs visualizing trends over time with baseline reference
 
 ### Advanced Visualization
 

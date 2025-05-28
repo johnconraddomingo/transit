@@ -41,11 +41,11 @@ METRICS_MAPPING = {
         "label": "Merged PRs",
         "category": "Speed",
         "format": "number"
-    },
-    "s_pr_review_time": {
+    },    "s_pr_review_time": {
         "label": "PR Review Time (minutes)",
         "category": "Speed",
-        "format": "number"
+        "format": "number",
+        "inverse": True  # Lower is better
     },
     "s_story_points": {
         "label": "Story Points Completed",
