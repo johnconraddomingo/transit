@@ -113,7 +113,7 @@ You'll know the virtual environment is activated when you see `(venv)` at the be
 Run the application with a year-month parameter:
 
 ```powershell
-python main.py 2025-05
+python collect_metrics.py 2025-05
 ```
 
 This will collect metrics for May 2025 for all projects defined in the configuration.
@@ -148,4 +148,4 @@ To add a new data source:
 
 1. Create a new class in the `src/data_sources` directory.
 2. Implement the necessary methods to collect metrics.
-3. Register the data source with the `MetricsCollector` instance in `main.py`.
+3. Register the data source with the `MetricsCollector` instance in `collect_metrics.py`.
