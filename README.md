@@ -156,3 +156,40 @@ To add a new data source:
 1. Create a new class in the `src/data_sources` directory.
 2. Implement the necessary methods to collect metrics.
 3. Register the data source with the `MetricsCollector` instance in `collect_metrics.py`.
+
+## Visualization Dashboard
+
+To generate a visualization dashboard from your metrics:
+
+```powershell
+python visualize.py --open
+```
+
+This will create an HTML dashboard in the `reports` folder and open it in your default browser.
+
+### Command Line Arguments
+
+- `--baseline`: Directory containing baseline metrics data (default: 'baseline')
+- `--ongoing`: Directory containing ongoing metrics data (default: 'ongoing')
+- `--output`: Directory to save generated dashboard (default: 'reports')
+- `--open`: Open the dashboard in browser after generation
+- `--basic`: Force the use of the basic dashboard generator (no external dependencies)
+
+### Visualization Features
+
+The dashboard shows:
+
+- Metrics organized by categories (Adoption, Speed, Quality, Experience, Delivery)
+- Current values compared to baseline
+- Percentage change with color-coded indicators (green for positive, red for negative)
+- Historical data for each metric showing month-by-month changes
+
+### Advanced Visualization
+
+For advanced charts and more sophisticated visualizations, install the required dependencies:
+
+```powershell
+pip install matplotlib pandas seaborn jinja2 numpy
+```
+
+When these dependencies are available, the visualization will automatically use them to generate more detailed charts.
