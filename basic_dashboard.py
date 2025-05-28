@@ -111,6 +111,15 @@ METRICS_MAPPING = {
 # Define category display order
 CATEGORY_ORDER = ["Adoption", "Speed", "Quality", "Experience", "Delivery"]
 
+# Define category weights for productivity index calculation
+CATEGORY_WEIGHTS = {
+    "Adoption": 0.0,  # 0%
+    "Speed": 0.38,    # 38% (12% + 12% + 14%)
+    "Quality": 0.40,  # 40% (10% + 10% + 10% + 10%)
+    "Experience": 0.12,  # 12% (3% + 3% + 3% + 3%)
+    "Delivery": 0.10   # 10%
+}
+
 # Define color scheme for charts
 CHART_COLORS = {
     "Adoption": "#4285F4",  # Blue
@@ -221,6 +230,97 @@ def get_trend_color(trend_pct, inverse=False):
     else:
         return "#FBBC05"  # Yellow for neutral
 
+def calculate_productivity_improvement(current_value, baseline_value, is_inverse=False):
+    """
+    Calculate the productivity improvement percentage between current and baseline values.
+    
+    Args:
+        current_value: Current metric value
+        baseline_value: Baseline metric value
+        is_inverse: Whether a lower value is better (e.g., for bugs)
+        
+    Returns:
+        Productivity improvement percentage
+    """
+    if baseline_value is None or baseline_value == 0:
+        return 0
+    
+    improvement = ((current_value - baseline_value) / abs(baseline_value)) * 100
+    
+    # For inverse metrics (where lower is better), negate the improvement
+    if is_inverse:
+        improvement = -improvement
+        
+    return improvement
+
+def calculate_weighted_productivity_index(metrics_data, metrics_by_category, baseline_data):
+    """
+    Calculate the weighted productivity index based on all metrics and their category weights.
+    
+    Args:
+        metrics_data: Dictionary with metrics and their values
+        metrics_by_category: Dictionary grouping metrics by their categories
+        baseline_data: Dictionary with baseline metric values
+        
+    Returns:
+        Dictionary with overall index value and details per category
+    """
+    productivity_data = {
+        "overall_index": 0.0,
+        "categories": {}
+    }
+    
+    # Process each category and its metrics
+    for category_name, metric_keys in metrics_by_category.items():
+        category_weight = CATEGORY_WEIGHTS.get(category_name, 0.0)
+        category_metrics = []
+        category_total_improvement = 0.0
+        
+        # Calculate improvement for each metric in the category
+        for metric_key in metric_keys:
+            if metric_key in metrics_data and metric_key in METRICS_MAPPING:
+                current_value = metrics_data[metric_key]
+                baseline_value = baseline_data.get(metric_key)
+                
+                if baseline_value is not None:
+                    is_inverse = METRICS_MAPPING[metric_key].get('inverse', False)
+                    improvement_pct = calculate_productivity_improvement(current_value, baseline_value, is_inverse)
+                    
+                    # Weight per metric is the category weight divided by number of metrics in category
+                    metric_count = len(metric_keys)
+                    metric_weight = category_weight / metric_count if metric_count > 0 else 0
+                    
+                    # Weight percentage formatted for display
+                    weight_pct = metric_weight * 100
+                    
+                    # Calculate weighted contribution to the index
+                    weighted_contribution = improvement_pct * metric_weight
+                    
+                    category_metrics.append({
+                        "key": metric_key,
+                        "name": METRICS_MAPPING[metric_key].get("label", metric_key),
+                        "baseline": baseline_value,
+                        "current": current_value,
+                        "improvement_pct": improvement_pct,
+                        "weight_pct": weight_pct,
+                        "weighted_contribution": weighted_contribution
+                    })
+                    
+                    category_total_improvement += weighted_contribution
+        
+        # Add category data to results
+        if category_metrics:
+            productivity_data["categories"][category_name] = {
+                "metrics": category_metrics,
+                "weight": category_weight * 100,  # Convert to percentage
+                "total_improvement": category_total_improvement
+            }
+            
+            # Add to overall index
+            productivity_data["overall_index"] += category_total_improvement
+    
+    return productivity_data
+
 def generate_simple_dashboard(baseline_dir=None, ongoing_dir=None, output_dir=None):
     """
     Generate a simple HTML dashboard
@@ -263,6 +363,10 @@ def generate_simple_dashboard(baseline_dir=None, ongoing_dir=None, output_dir=No
 
     # Sort dates chronologically for time series
     sorted_dates = sorted(time_series_data.keys()) if time_series_data else []
+    
+    # Calculate the weighted productivity index
+    productivity_data = calculate_weighted_productivity_index(latest_data, metrics_by_category, baseline_data)
+    overall_index = productivity_data["overall_index"]
     
     # JavaScript for line charts (outside of Python f-string)
     js_code = """
@@ -514,12 +618,57 @@ def generate_simple_dashboard(baseline_dir=None, ongoing_dir=None, output_dir=No
             display: flex;
             justify-content: space-between;
             margin-bottom: 4px;
-        }}
-        .generation-info {{
+        }}        .generation-info {{
             text-align: center;
             margin-top: 40px;
             color: #586069;
             font-size: 14px;
+        }}
+        .productivity-summary {{
+            margin-top: 40px;
+            margin-bottom: 40px;
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+            padding: 20px;
+        }}
+        .productivity-header {{
+            font-size: 22px;
+            font-weight: 600;
+            margin-bottom: 20px;
+            color: #24292e;
+            text-align: center;
+        }}
+        .productivity-table {{
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+        }}
+        .productivity-table th, .productivity-table td {{
+            padding: 10px;
+            border: 1px solid #e1e4e8;
+            text-align: center;
+        }}
+        .productivity-table th {{
+            background-color: #f6f8fa;
+            font-weight: 600;
+        }}
+        .productivity-table tr.category-header-row {{
+            background-color: #f1f4f8;
+            font-weight: 600;
+        }}
+        .productivity-index {{
+            font-size: 20px;
+            font-weight: 700;
+            margin-top: 30px;
+            text-align: center;
+        }}
+        .productivity-note {{
+            font-style: italic;
+            color: #586069;
+            text-align: center;
+            margin-top: 10px;
         }}
         .chart-container {{
             margin-top: 20px;
@@ -689,6 +838,73 @@ def generate_simple_dashboard(baseline_dir=None, ongoing_dir=None, output_dir=No
         </div>
     </div>
         """
+    
+    # Add productivity metrics summary table
+    html_content += """
+    <div class="productivity-summary">
+        <div class="productivity-header">Productivity Metrics Dashboard</div>
+        <table class="productivity-table">
+            <thead>
+                <tr>
+                    <th>Dimension</th>
+                    <th>Metric</th>
+                    <th>Baseline</th>
+                    <th>New Average</th>
+                    <th>Productivity Comparison</th>
+                    <th>Weight</th>
+                    <th>Index Input</th>
+                </tr>
+            </thead>
+            <tbody>
+    """
+    
+    # Add rows for each category and its metrics
+    for category_name in sorted_categories:
+        if category_name in productivity_data["categories"]:
+            category_data = productivity_data["categories"][category_name]
+            
+            # Add category header row
+            html_content += f"""
+                <tr class="category-header-row">
+                    <td><strong>{category_name}</strong></td>
+                    <td colspan="6"></td>
+                </tr>
+            """
+            
+            # Add rows for each metric
+            for metric in category_data["metrics"]:
+                # Format the metric values
+                baseline_val = format_value(metric["baseline"], METRICS_MAPPING[metric["key"]].get("format", "number"))
+                current_val = format_value(metric["current"], METRICS_MAPPING[metric["key"]].get("format", "number"))
+                improvement_pct = f"{metric['improvement_pct']:.2f}%"
+                weight_pct = f"{metric['weight_pct']:.0f}%"
+                index_input = f"{metric['weighted_contribution']:.2f}%"
+                
+                html_content += f"""
+                <tr>
+                    <td></td>
+                    <td>{metric["name"]}</td>
+                    <td>{baseline_val}</td>
+                    <td>{current_val}</td>
+                    <td>{improvement_pct}</td>
+                    <td>{weight_pct}</td>
+                    <td>{index_input}</td>
+                </tr>
+                """
+    
+    # Close the table and add overall productivity index
+    html_content += f"""
+            </tbody>
+        </table>
+        
+        <div class="productivity-index">
+            <strong>Overall Productivity Index:</strong> {overall_index:.2f}%
+        </div>
+        <div class="productivity-note">
+            <em>This index reflects the weighted improvement across all tracked metrics, providing a holistic view of productivity gains.</em>
+        </div>
+    </div>
+    """
     
     # Add footer
     generation_date = datetime.now().strftime('%Y-%m-%d %H:%M:%S')

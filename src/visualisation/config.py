@@ -116,5 +116,14 @@ CHART_COLORS = {
     "Delivery": "#8334A4"    # Purple
 }
 
+# Define category weights for productivity index calculation
+CATEGORY_WEIGHTS = {
+    "Adoption": 0.0,  # 0%
+    "Speed": 0.38,    # 38% (12% + 12% + 14%)
+    "Quality": 0.40,  # 40% (10% + 10% + 10% + 10%)
+    "Experience": 0.12,  # 12% (3% + 3% + 3% + 3%)
+    "Delivery": 0.10   # 10%
+}
+
 # Dashboard title
 DASHBOARD_TITLE = "GitHub Copilot Metrics Framework"
