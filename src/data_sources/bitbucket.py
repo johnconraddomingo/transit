@@ -98,3 +98,110 @@ class BitbucketDataSource:
         except requests.exceptions.RequestException as e:
             print(f"Error fetching merged PRs from Bitbucket: {e}")
             return 0
+    
+    def get_pr_review_time(self, project_path, year, month):
+        """
+        Get the average PR review time (creation to approval) for a specific project and month.
+        
+        Args:
+            project_path (str): Project path in format "PROJECT/REPO"
+            year (str): Year (e.g. "2025")
+            month (str): Month (e.g. "05")
+            
+        Returns:
+            float: Average PR review time in hours or 0 if no PRs
+        """
+        # Split project path into project and repo parts
+        project, repo = project_path.split('/')
+        
+        # Calculate start and end dates for the month
+        year_int = int(year)
+        month_int = int(month)
+        
+        # Get the last day of the month
+        _, last_day = calendar.monthrange(year_int, month_int)
+        
+        # Format dates for the API
+        start_date = f"{year}-{month}-01T00:00:00.000Z"
+        end_date = f"{year}-{month}-{last_day}T23:59:59.999Z"
+        
+        # Construct API endpoint for pull requests
+        api_endpoint = f"/rest/api/1.0/projects/{project}/repos/{repo}/pull-requests"
+        url = urljoin(self.base_url, api_endpoint)
+        
+        # Parameters for the API request
+        params = {
+            'state': 'MERGED',
+            'mergedSince': start_date,
+            'mergedUntil': end_date,
+            'limit': 1000  # Adjust as needed, may need pagination for large repos
+        }
+        
+        try:
+            if self.auth:
+                response = requests.get(url, headers=self.headers, params=params, auth=self.auth)
+            else:
+                response = requests.get(url, headers=self.headers, params=params)
+                
+            response.raise_for_status()
+            data = response.json()
+            
+            # Get PR details for calculating review time
+            prs = data.get('values', [])
+            
+            if not prs:
+                return 0  # Return 0 if no PRs found
+            
+            total_review_time = 0
+            pr_count = 0
+            
+            for pr in prs:
+                # Extract creation and approval timestamps
+                created_date = pr.get('createdDate')
+                
+                # Get the approval date from the PR activities
+                # Need to make another API call for each PR
+                pr_id = pr.get('id')
+                pr_activities_url = f"{url}/{pr_id}/activities"
+                
+                try:
+                    if self.auth:
+                        activities_response = requests.get(pr_activities_url, headers=self.headers, auth=self.auth)
+                    else:
+                        activities_response = requests.get(pr_activities_url, headers=self.headers)
+                    
+                    activities_response.raise_for_status()
+                    activities = activities_response.json().get('values', [])
+                    
+                    # Find the first approval activity
+                    approval_date = None
+                    for activity in activities:
+                        if activity.get('action') == 'APPROVED':
+                            approval_date = activity.get('createdDate')
+                            break
+                    
+                    # Calculate the review time if both dates exist
+                    if created_date and approval_date:
+                        # Convert timestamps to datetime objects (timestamps are in milliseconds)
+                        created_datetime = datetime.fromtimestamp(created_date / 1000)
+                        approval_datetime = datetime.fromtimestamp(approval_date / 1000)
+                        
+                        # Calculate review time in hours
+                        review_time = (approval_datetime - created_datetime).total_seconds() / 3600
+                        
+                        total_review_time += review_time
+                        pr_count += 1
+                
+                except requests.exceptions.RequestException as e:
+                    print(f"Error fetching activities for PR {pr_id}: {e}")
+                    continue
+            
+            # Calculate the average review time
+            if pr_count > 0:
+                return total_review_time / pr_count
+            else:
+                return 0
+                
+        except requests.exceptions.RequestException as e:
+            print(f"Error fetching PR review time from Bitbucket: {e}")
+            return 0

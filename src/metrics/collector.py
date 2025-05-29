@@ -12,6 +12,7 @@ class MetricsCollector:
         self.data_sources = {}
         self.metric_mappings = {
             'merged_pr': ('bitbucket', 'get_merged_prs'),
+            'pr_review_time': ('bitbucket', 'get_pr_review_time'),
             'bugs': ('sonarqube', 'get_bugs'),
             'story_points': ('jira', 'get_story_points'),
             'deployment_frequency': ('jenkins', 'get_deployment_frequency'),

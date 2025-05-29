@@ -104,10 +104,13 @@ def main():
         print(f"Collecting metrics for project: {project}")
         
         if project not in results:
-            results[project] = {}
-          # Collect merged PRs - this will automatically use the bitbucket datasource
+            results[project] = {}        # Collect merged PRs - this will automatically use the bitbucket datasource
         merged_prs = collector.collect_metric('merged_pr', project, year, month)
         results[project]['s_merged_prs'] = merged_prs
+        
+        # Collect PR review time (average time from creation to approval) 
+        pr_review_time = collector.collect_metric('pr_review_time', project, year, month)
+        results[project]['s_pr_review_time'] = pr_review_time
           # Collect bugs from SonarQube - this will automatically use the sonarqube datasource        # For SonarQube, we use the same project identifier as it should match the SonarQube project key
         bugs = collector.collect_metric('bugs', project, year, month)
         results[project]['q_bugs'] = bugs
