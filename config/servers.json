@@ -9,7 +9,7 @@
             "enabled": true
         },
         "jira": {
-            "url": "https://jira.int.corp.sun",
+            "url": "https://jira.suncorp.app",
             "enabled": true
         },
         "jenkins": {
