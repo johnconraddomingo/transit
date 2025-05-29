@@ -5,5 +5,12 @@
     "editor.formatOnSave": true,
     "[python]": {
         "editor.defaultFormatter": "ms-python.black-formatter"
+    },
+    "github.copilot.advanced": {
+        "excludeFiles": [
+            "**/*.env",
+            "**/secrets/**",
+            "**/config/tokens.json"
+        ]
     }
 }
