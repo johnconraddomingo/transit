@@ -1,136 +1,21 @@
 """
 Simple HTML dashboard generator for GitHub Copilot Metrics Framework.
-This version uses only built-in Python libraries to avoid dependency issues.
 """
 import os
 import sys
 import re
+import json 
 from datetime import datetime
 
-# Configuration for visualizing metrics data
-METRICS_MAPPING = {
-    # Adoption metrics
-    "a_active_users": {
-        "label": "Active Users",
-        "category": "Adoption",
-        "format": "number"
-    },
-    "a_ai_adoption_rate": {
-        "label": "AI Adoption Rate",
-        "category": "Adoption",
-        "format": "percentage"
-    },
-    "a_ai_usage": {
-        "label": "AI Usage",
-        "category": "Adoption",
-        "format": "percentage"
-    },
-    "a_code_suggestions": {
-        "label": "Code Suggestions",
-        "category": "Adoption",
-        "format": "number"
-    },
-    "a_code_accepted": {
-        "label": "Code Accepted",
-        "category": "Adoption",
-        "format": "number"
-    },
-    
-    # Speed metrics
-    "s_merged_prs": {
-        "label": "Merged PRs",
-        "category": "Speed",
-        "format": "number"
-    },    "s_pr_review_time": {
-        "label": "PR Review Time (minutes)",
-        "category": "Speed",
-        "format": "number",
-        "inverse": True  # Lower is better
-    },
-    "s_story_points": {
-        "label": "Story Points Completed",
-        "category": "Speed",
-        "format": "number"
-    },
-    
-    # Quality metrics
-    "q_code_smells": {
-        "label": "Code Smells",
-        "category": "Quality",
-        "format": "number",
-        "inverse": True  # Lower is better
-    },
-    "q_coverage": {
-        "label": "Code Coverage",
-        "category": "Quality",
-        "format": "percentage"
-    },
-    "q_bugs": {
-        "label": "Bugs",
-        "category": "Quality",
-        "format": "number",
-        "inverse": True  # Lower is better
-    },
-    "q_vulnerabilities": {
-        "label": "Vulnerabilities",
-        "category": "Quality",
-        "format": "number",
-        "inverse": True  # Lower is better
-    },
-    
-    # Experience metrics
-    "e_user_satisfaction": {
-        "label": "User Satisfaction",
-        "category": "Experience",
-        "format": "percentage"
-    },
-    "e_adoption": {
-        "label": "Team Adoption",
-        "category": "Experience",
-        "format": "percentage"
-    },
-    "e_productivity": {
-        "label": "Perceived Productivity",
-        "category": "Experience",
-        "format": "percentage"
-    },
-    "e_use_cases": {
-        "label": "Use Cases",
-        "category": "Experience",
-        "format": "number"
-    },
-    
-    # Delivery metrics
-    "d_deployment_frequency": {
-        "label": "Deployment Frequency (per week)",
-        "category": "Delivery",
-        "format": "number"
-    }
-}
+# Define the path to the metrics mapping and category weights
+def load_config(config_path="config/dashboard_config.json"):
+    with open(config_path, "r") as f:
+        return json.load(f)
 
-# Define category display order
-CATEGORY_ORDER = ["Adoption", "Speed", "Quality", "Experience", "Delivery"]
-
-# Define category weights for productivity index calculation
-CATEGORY_WEIGHTS = {
-    "Adoption": 0.0,  # 0%
-    "Speed": 0.38,    # 38% (12% + 12% + 14%)
-    "Quality": 0.40,  # 40% (10% + 10% + 10% + 10%)
-    "Experience": 0.12,  # 12% (3% + 3% + 3% + 3%)
-    "Delivery": 0.10   # 10%
-}
-
-# Define color scheme for charts
-CHART_COLORS = {
-    "Adoption": "#4285F4",  # Blue
-    "Speed": "#EA4335",     # Red
-    "Quality": "#34A853",   # Green
-    "Experience": "#FBBC05", # Yellow
-    "Delivery": "#8334A4"    # Purple
-}
+config = load_config()
 
 # Dashboard title
-DASHBOARD_TITLE = "GitHub Copilot Metrics Framework"
+config["dashboard_title"] = "GitHub Copilot Metrics Framework"
 
 def load_csv_data(file_path):
     """
@@ -272,18 +157,18 @@ def calculate_weighted_productivity_index(metrics_data, metrics_by_category, bas
     
     # Process each category and its metrics
     for category_name, metric_keys in metrics_by_category.items():
-        category_weight = CATEGORY_WEIGHTS.get(category_name, 0.0)
+        category_weight = config["category_weights"].get(category_name, 0.0)
         category_metrics = []
         category_total_improvement = 0.0
         
         # Calculate improvement for each metric in the category
         for metric_key in metric_keys:
-            if metric_key in metrics_data and metric_key in METRICS_MAPPING:
+            if metric_key in metrics_data and metric_key in config["metrics_mapping"]:
                 current_value = metrics_data[metric_key]
                 baseline_value = baseline_data.get(metric_key)
                 
                 if baseline_value is not None:
-                    is_inverse = METRICS_MAPPING[metric_key].get('inverse', False)
+                    is_inverse = config["metrics_mapping"][metric_key].get('inverse', False)
                     improvement_pct = calculate_productivity_improvement(current_value, baseline_value, is_inverse)
                     
                     # Weight per metric is the category weight divided by number of metrics in category
@@ -298,7 +183,7 @@ def calculate_weighted_productivity_index(metrics_data, metrics_by_category, bas
                     
                     category_metrics.append({
                         "key": metric_key,
-                        "name": METRICS_MAPPING[metric_key].get("label", metric_key),
+                        "name": config["metrics_mapping"][metric_key].get("label", metric_key),
                         "baseline": baseline_value,
                         "current": current_value,
                         "improvement_pct": improvement_pct,
@@ -334,7 +219,7 @@ def generate_simple_dashboard(baseline_dir=None, ongoing_dir=None, output_dir=No
     current_dir = os.path.dirname(os.path.abspath(__file__))
     baseline_dir = baseline_dir or os.path.join(current_dir, "baseline")
     ongoing_dir = ongoing_dir or os.path.join(current_dir, "ongoing")
-    output_dir = output_dir or os.path.join(current_dir, "reports")
+    output_dir = output_dir or os.path.join(current_dir, "src", "Dashboards")
     os.makedirs(output_dir, exist_ok=True)
     
     print("Loading data...")
@@ -349,7 +234,7 @@ def generate_simple_dashboard(baseline_dir=None, ongoing_dir=None, output_dir=No
     
     # Group metrics by category
     metrics_by_category = {}
-    for metric_key, metadata in METRICS_MAPPING.items():
+    for metric_key, metadata in config["metrics_mapping"].items():
         category = metadata.get('category', 'Uncategorized')
         if category not in metrics_by_category:
             metrics_by_category[category] = []
@@ -358,7 +243,7 @@ def generate_simple_dashboard(baseline_dir=None, ongoing_dir=None, output_dir=No
     # Sort categories according to the defined order
     sorted_categories = sorted(
         metrics_by_category.keys(),
-        key=lambda x: CATEGORY_ORDER.index(x) if x in CATEGORY_ORDER else len(CATEGORY_ORDER)
+        key=lambda x: config["category_order"].index(x) if x in config["category_order"] else len(config["category_order"])
     )
 
     # Sort dates chronologically for time series
@@ -533,7 +418,7 @@ def generate_simple_dashboard(baseline_dir=None, ongoing_dir=None, output_dir=No
 <!DOCTYPE html>
 <html>
 <head>
-    <title>{DASHBOARD_TITLE}</title>
+    <title>{config["dashboard_title"]}</title>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <style>
@@ -706,7 +591,7 @@ def generate_simple_dashboard(baseline_dir=None, ongoing_dir=None, output_dir=No
 </head>
 <body>
     <div class="dashboard-header">
-        <h1 class="dashboard-title">{DASHBOARD_TITLE}</h1>
+        <h1 class="dashboard-title">{config["dashboard_title"]}</h1>
         <p class="dashboard-subtitle">
             Data from {latest_date.strftime('%B %Y') if latest_date else 'No data'} compared to baseline
         </p>
@@ -715,7 +600,7 @@ def generate_simple_dashboard(baseline_dir=None, ongoing_dir=None, output_dir=No
     
     # Add category sections
     for category in sorted_categories:
-        category_color = CHART_COLORS.get(category, "#4285F4")
+        category_color = config["chart_colors"].get(category, "#4285F4")
         html_content += f"""
     <div class="category-section">
         <div class="category-header" style="background-color: {category_color};">
@@ -733,19 +618,19 @@ def generate_simple_dashboard(baseline_dir=None, ongoing_dir=None, output_dir=No
                 trend_pct = calculate_trend(current_value, baseline_value) if baseline_value is not None else None
                 
                 # Check if this metric is inverse (lower is better)
-                is_inverse = METRICS_MAPPING[metric_key].get('inverse', False)
+                is_inverse = config["metrics_mapping"][metric_key].get('inverse', False)
                 
                 # Get trend color
                 trend_color = get_trend_color(trend_pct, is_inverse) if trend_pct is not None else None
                 
                 # Format values
-                format_type = METRICS_MAPPING[metric_key].get('format', 'number')
+                format_type = config["metrics_mapping"][metric_key].get('format', 'number')
                 formatted_current = format_value(current_value, format_type)
                 formatted_baseline = format_value(baseline_value, format_type) if baseline_value is not None else 'N/A'
                 
                 html_content += f"""
             <div class="metric-card">
-                <div class="metric-title">{METRICS_MAPPING[metric_key].get('label', metric_key)}</div>
+                <div class="metric-title">{config["metrics_mapping"][metric_key].get('label', metric_key)}</div>
                 <div class="metric-value">{formatted_current}</div>
                 <div class="metric-baseline">Baseline: {formatted_baseline}</div>
                 """
@@ -874,8 +759,8 @@ def generate_simple_dashboard(baseline_dir=None, ongoing_dir=None, output_dir=No
             # Add rows for each metric
             for metric in category_data["metrics"]:
                 # Format the metric values
-                baseline_val = format_value(metric["baseline"], METRICS_MAPPING[metric["key"]].get("format", "number"))
-                current_val = format_value(metric["current"], METRICS_MAPPING[metric["key"]].get("format", "number"))
+                baseline_val = format_value(metric["baseline"], config["metrics_mapping"][metric["key"]].get("format", "number"))
+                current_val = format_value(metric["current"], config["metrics_mapping"][metric["key"]].get("format", "number"))
                 improvement_pct = f"{metric['improvement_pct']:.2f}%"
                 weight_pct = f"{metric['weight_pct']:.0f}%"
                 index_input = f"{metric['weighted_contribution']:.2f}%"

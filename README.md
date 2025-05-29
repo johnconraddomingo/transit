@@ -157,12 +157,12 @@ To add a new data source:
 2. Implement the necessary methods to collect metrics.
 3. Register the data source with the `MetricsCollector` instance in `collect_metrics.py`.
 
-## Visualization Dashboard
+## Visualisation Dashboard
 
-To generate a visualization dashboard from your metrics:
+To generate a visualisation dashboard from your metrics:
 
 ```powershell
-python visualize.py --open
+python visualise.py --open
 ```
 
 This will create an HTML dashboard in the `reports` folder and open it in your default browser.
@@ -175,7 +175,7 @@ This will create an HTML dashboard in the `reports` folder and open it in your d
 - `--open`: Open the dashboard in browser after generation
 - `--basic`: Force the use of the basic dashboard generator (no external dependencies)
 
-### Visualization Features
+### Visualisation Features
 
 The dashboard shows:
 
@@ -183,14 +183,14 @@ The dashboard shows:
 - Current values compared to baseline
 - Percentage change with color-coded indicators (green for positive, red for negative)
 - Historical data for each metric showing month-by-month changes
-- Line graphs visualizing trends over time with baseline reference
+- Line graphs visualising trends over time with baseline reference
 
-### Advanced Visualization
+### Advanced Visualisation
 
-For advanced charts and more sophisticated visualizations, install the required dependencies:
+For advanced charts and more sophisticated visualisations, install the required dependencies:
 
 ```powershell
 pip install matplotlib pandas seaborn jinja2 numpy
 ```
 
-When these dependencies are available, the visualization will automatically use them to generate more detailed charts.
+When these dependencies are available, the visualisation will automatically use them to generate more detailed charts.
