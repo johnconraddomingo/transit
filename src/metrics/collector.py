@@ -11,12 +11,19 @@ class MetricsCollector:
         """Initialize the MetricsCollector with empty data sources and mappings."""
         self.data_sources = {}
         self.metric_mappings = {
+            'active_users': ('github', 'get_active_users'),
+            'adoption_rate': ('github', 'get_copilot_adoption_rate'),
+            'ai_usage': ('github', 'get_ai_usage'),
+            'suggested_lines': ('github', 'get_copilot_suggested_lines'),
+            'accepted_lines': ('github', 'get_copilot_accepted_lines'),
             'merged_pr': ('bitbucket', 'get_merged_prs'),
             'pr_review_time': ('bitbucket', 'get_pr_review_time'),
-            'bugs': ('sonarqube', 'get_bugs'),
             'story_points': ('jira', 'get_story_points'),
+            'code_smells': ('sonarqube', 'get_code_smells'),
+            'code_coverage': ('jenkins', 'get_code_coverage'),
+            'bugs': ('sonarqube', 'get_bugs'),            
+            'vulnerabilities': ('sonarqube', 'get_vulnerabilities'),            
             'deployment_frequency': ('jenkins', 'get_deployment_frequency'),
-            'active_users': ('github', 'get_active_users')
         }
     
     def register_data_source(self, name, data_source):
