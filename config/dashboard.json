@@ -23,7 +23,7 @@
   },
   "metrics_mapping": {
     "a_active_users": {
-      "label": "Active Users",
+      "label": "Number of Active Users",
       "category": "Adoption",
       "format": "number"
     },
@@ -38,39 +38,39 @@
       "format": "percentage"
     },
     "a_code_suggestions": {
-      "label": "Code Suggestions",
+      "label": "Code Lines Suggested by Copilot",
       "category": "Adoption",
       "format": "number"
     },
     "a_code_accepted": {
-      "label": "Code Accepted",
+      "label": "Code Lines Accepted from Copilot",
       "category": "Adoption",
       "format": "number"
     },
     "s_merged_prs": {
-      "label": "Merged PRs",
+      "label": "Number of Merged PRs",
       "category": "Speed",
       "format": "number"
     },
     "s_pr_review_time": {
-      "label": "PR Review Time (minutes)",
+      "label": "Avg PR Review Time (Mins)",
       "category": "Speed",
       "format": "number",
       "inverse": true
     },
     "s_story_points": {
-      "label": "Story Points Completed",
+      "label": "Story Points (Squad Level)",
       "category": "Speed",
       "format": "number"
     },
     "q_code_smells": {
-      "label": "Code Smells",
+      "label": "Code Quality / Code Smells",
       "category": "Quality",
       "format": "number",
       "inverse": true
     },
     "q_coverage": {
-      "label": "Code Coverage",
+      "label": "Unit Test Coverage",
       "category": "Quality",
       "format": "percentage"
     },
@@ -92,12 +92,12 @@
       "format": "percentage"
     },
     "e_adoption": {
-      "label": "Team Adoption",
+      "label": "Adoption & Frequency",
       "category": "Experience",
       "format": "percentage"
     },
     "e_productivity": {
-      "label": "Perceived Productivity",
+      "label": "Productivity, Quality & Benefits Sentiments",
       "category": "Experience",
       "format": "percentage"
     },
