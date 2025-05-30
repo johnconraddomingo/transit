@@ -598,12 +598,53 @@ def generate_simple_dashboard(baseline_dir=None, ongoing_dir=None, output_dir=No
             margin-top: 15px;
             font-size: 14px;
             color: #586069;
+            border: 1px solid #e1e4e8;
+            border-radius: 4px;
+            overflow: hidden;
+        }}
+        .metric-history summary {{
+            padding: 8px 12px;
+            cursor: pointer;
+            user-select: none;
+            background-color: #f6f8fa;
+            border-bottom: 1px solid #e1e4e8;
+            list-style: none;
+            position: relative;
+        }}
+        .metric-history summary::-webkit-details-marker {{
+            display: none;
+        }}
+        .metric-history summary::after {{
+            content: '';
+            border-width: 0.4em;
+            border-style: solid;
+            border-color: transparent transparent transparent #586069;
+            position: absolute;
+            top: 50%;
+            right: 1em;
+            transform: translateY(-50%);
+        }}
+        .metric-history[open] summary::after {{
+            border-color: #586069 transparent transparent;
+            transform: translateY(-50%) rotate(180deg);
+        }}
+        .metric-history summary:hover {{
+            background-color: #f0f3f6;
+        }}
+        .metric-history-content {{
+            padding: 8px 12px;
+            background-color: #ffffff;
         }}
         .metric-history-item {{
             display: flex;
             justify-content: space-between;
-            margin-bottom: 4px;
-        }}        .generation-info {{
+            padding: 4px 0;
+            border-bottom: 1px solid #eaecef;
+        }}
+        .metric-history-item:last-child {{
+            border-bottom: none;
+        }}
+        .generation-info {{
             text-align: center;
             margin-top: 40px;
             color: #586069;
@@ -752,12 +793,12 @@ def generate_simple_dashboard(baseline_dir=None, ongoing_dir=None, output_dir=No
                     {trend_pct:+.1f}% {trend_arrow} ({better_text})
                 </div>
                 """
-                
-                # Add historical data if available
+                  # Add historical data if available
                 if sorted_dates:
                     html_content += """
-                    <div class="metric-history">
-                        <strong>Historical Data</strong>
+                    <details open class="metric-history">
+                        <summary><strong>Historical Data</strong></summary>
+                        <div class="metric-history-content">
                     """
                     
                     # Add historical data points
@@ -768,14 +809,14 @@ def generate_simple_dashboard(baseline_dir=None, ongoing_dir=None, output_dir=No
                             month_year = date.strftime('%b %Y')
                             
                             html_content += f"""
-                        <div class="metric-history-item">
-                            <span>{month_year}</span>
-                            <span>{formatted_value}</span>
-                        </div>
+                            <div class="metric-history-item">
+                                <span>{month_year}</span>
+                                <span>{formatted_value}</span>
+                            </div>
                             """
-                    
                     html_content += """
-                    </div>
+                        </div>
+                    </details>
                     """
                 
                 # Configure chart options
