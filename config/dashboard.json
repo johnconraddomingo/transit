@@ -1,0 +1,115 @@
+{
+  "dashboard_title": "GitHub Copilot Metrics Framework",
+  "category_order": [
+    "Adoption",
+    "Speed",
+    "Quality",
+    "Experience",
+    "Delivery"
+  ],
+  "category_weights": {
+    "Adoption": 0.0,
+    "Speed": 0.38,
+    "Quality": 0.4,
+    "Experience": 0.12,
+    "Delivery": 0.1
+  },
+  "chart_colors": {
+    "Adoption": "#4285F4",
+    "Speed": "#EA4335",
+    "Quality": "#34A853",
+    "Experience": "#FBBC05",
+    "Delivery": "#8334A4"
+  },
+  "metrics_mapping": {
+    "a_active_users": {
+      "label": "Active Users",
+      "category": "Adoption",
+      "format": "number"
+    },
+    "a_ai_adoption_rate": {
+      "label": "AI Adoption Rate",
+      "category": "Adoption",
+      "format": "percentage"
+    },
+    "a_ai_usage": {
+      "label": "AI Usage",
+      "category": "Adoption",
+      "format": "percentage"
+    },
+    "a_code_suggestions": {
+      "label": "Code Suggestions",
+      "category": "Adoption",
+      "format": "number"
+    },
+    "a_code_accepted": {
+      "label": "Code Accepted",
+      "category": "Adoption",
+      "format": "number"
+    },
+    "s_merged_prs": {
+      "label": "Merged PRs",
+      "category": "Speed",
+      "format": "number"
+    },
+    "s_pr_review_time": {
+      "label": "PR Review Time (minutes)",
+      "category": "Speed",
+      "format": "number",
+      "inverse": true
+    },
+    "s_story_points": {
+      "label": "Story Points Completed",
+      "category": "Speed",
+      "format": "number"
+    },
+    "q_code_smells": {
+      "label": "Code Smells",
+      "category": "Quality",
+      "format": "number",
+      "inverse": true
+    },
+    "q_coverage": {
+      "label": "Code Coverage",
+      "category": "Quality",
+      "format": "percentage"
+    },
+    "q_bugs": {
+      "label": "Bugs",
+      "category": "Quality",
+      "format": "number",
+      "inverse": true
+    },
+    "q_vulnerabilities": {
+      "label": "Vulnerabilities",
+      "category": "Quality",
+      "format": "number",
+      "inverse": true
+    },
+    "e_user_satisfaction": {
+      "label": "User Satisfaction",
+      "category": "Experience",
+      "format": "percentage"
+    },
+    "e_adoption": {
+      "label": "Team Adoption",
+      "category": "Experience",
+      "format": "percentage"
+    },
+    "e_productivity": {
+      "label": "Perceived Productivity",
+      "category": "Experience",
+      "format": "percentage"
+    },
+    "e_use_cases": {
+      "label": "Use Cases",
+      "category": "Experience",
+      "format": "number"
+    },
+    "d_deployment_frequency": {
+      "label": "Deployment Frequency (per week)",
+      "category": "Delivery",
+      "format": "number"
+    }
+  }
+}
