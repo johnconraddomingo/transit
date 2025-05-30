@@ -218,7 +218,7 @@ def calculate_weighted_productivity_index(metrics_data, metrics_by_category, bas
                     metric_weight = category_weight / metric_count if metric_count > 0 else 0
                     
                     # Weight percentage formatted for display
-                    weight_pct = metric_weight * 100                    # Calculate weighted contribution to the index
+                    weight_pct = metric_weight * 100                    # Calculate the weighted productivity index
                     # Apply improvement percentage to the metric weight to get weighted contribution
                     weighted_contribution = improvement_pct * metric_weight
                     
@@ -507,6 +507,14 @@ def generate_simple_dashboard(baseline_dir=None, ongoing_dir=None, output_dir=No
             text-align: center;
             margin-bottom: 40px;
         }}
+        .dashboard-logo {{
+            max-width: 300px;
+            height: auto;
+            margin-bottom: 20px;
+            display: block;
+            margin-left: auto;
+            margin-right: auto;
+        }}
         .dashboard-title {{
             font-size: 28px;
             font-weight: 600;
@@ -669,6 +677,7 @@ def generate_simple_dashboard(baseline_dir=None, ongoing_dir=None, output_dir=No
 </head>
 <body>
     <div class="dashboard-header">
+        <img src="../images/suncorp-logo.png" alt="Suncorp Logo" class="dashboard-logo" />
         <h1 class="dashboard-title">{config["dashboard_title"]}</h1>
         <p class="dashboard-subtitle">
             {latest_date.strftime('Data from %B %Y compared to baseline') if latest_date else 'Baseline data only - No historical data available'}
@@ -872,7 +881,7 @@ def generate_simple_dashboard(baseline_dir=None, ongoing_dir=None, output_dir=No
                 # This ensures consistency between what's shown in the table
                 displayed_improvement_float = float(displayed_improvement)
                 displayed_weight_float = float(displayed_weight)
-                precise_contribution = (displayed_improvement_float * displayed_weight_float / 100)
+                precise_contribution = (displayed_improvement_float * displayed_weight_float / 100);
                 
                 # Format for display
                 improvement_pct = f"{displayed_improvement}%"
