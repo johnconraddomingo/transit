@@ -283,6 +283,4 @@ You can customize the dashboard by modifying `config/dashboard.json`:
 - Category weights and order
 - Chart colors
 - Value formatting (percentage/number)
-
-The dashboard updates automatically when new data is added to the `ongoing` directory
-
+ 
