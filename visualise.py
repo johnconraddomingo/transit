@@ -5,7 +5,17 @@ import os
 import sys
 import re
 import json 
+import base64
 from datetime import datetime
+
+def encode_image_to_base64(image_path):
+    """
+    Encode an image file to base64 string.
+    """
+    with open(image_path, 'rb') as image_file:
+        encoded_string = base64.b64encode(image_file.read()).decode('utf-8')
+        image_ext = os.path.splitext(image_path)[1].lstrip('.')
+        return f"data:image/{image_ext};base64,{encoded_string}"
 
 # Define the path to the metrics mapping and category weights
 def load_config(config_path="config/dashboard.json"):
@@ -271,6 +281,10 @@ def generate_simple_dashboard(baseline_dir=None, ongoing_dir=None, output_dir=No
     ongoing_dir = ongoing_dir or os.path.join(current_dir, "ongoing")
     output_dir = output_dir or os.path.join(current_dir, "reports")
     os.makedirs(output_dir, exist_ok=True)
+
+    # Load and encode the logo
+    logo_path = os.path.join(current_dir, "images", "suncorp-logo.png")
+    logo_base64 = encode_image_to_base64(logo_path)
     
     print("Loading data...")
     baseline_data, time_series_data, average_data = load_all_data(baseline_dir, ongoing_dir)
@@ -677,7 +691,7 @@ def generate_simple_dashboard(baseline_dir=None, ongoing_dir=None, output_dir=No
 </head>
 <body>
     <div class="dashboard-header">
-        <img src="../images/suncorp-logo.png" alt="Suncorp Logo" class="dashboard-logo" />
+        <img src="{logo_base64}" alt="Suncorp Logo" class="dashboard-logo" />
         <h1 class="dashboard-title">{config["dashboard_title"]}</h1>
         <p class="dashboard-subtitle">
             {latest_date.strftime('Data from %B %Y compared to baseline') if latest_date else 'Baseline data only - No historical data available'}
