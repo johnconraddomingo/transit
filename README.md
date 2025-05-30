@@ -196,3 +196,92 @@ e_use_cases,8
 d_deployment_frequency,2
 ```
 The order does not matter
+
+## Visualization
+
+To visualize the metrics and generate an HTML dashboard, run:
+
+```powershell
+python visualise.py
+```
+
+By default, this will:
+1. Load baseline data from the `baseline` directory
+2. Load ongoing metrics from the `ongoing` directory
+3. Generate an HTML dashboard in the `reports` directory
+
+You can also specify custom paths:
+
+```powershell
+python visualise.py [baseline_dir] [ongoing_dir] [output_dir]
+```
+
+### Dashboard Features
+
+The dashboard includes:
+- Metrics organized by categories (Adoption, Speed, Quality, Experience, Delivery)
+- Historical trends with interactive line charts
+- Comparison between current values and baseline
+- New averages across time periods
+- Productivity improvement calculations
+- Weighted productivity index
+
+### Productivity Index Calculation
+
+The productivity index is calculated using weighted contributions from each metric:
+1. Individual metric improvement = ((Current - Baseline) / |Baseline|) * 100%
+2. For inverse metrics (where lower is better), the improvement is negated
+3. Each metric's contribution = Improvement * Category Weight
+4. Overall index = Sum of all metric contributions
+
+Category weights are configured in `config/dashboard.json`:
+- Speed: 38%
+- Quality: 40%
+- Experience: 12%
+- Delivery: 10%
+- Adoption: 0% (tracked but not weighted in the index)
+
+### Customization
+
+You can customize the dashboard by modifying `config/dashboard.json`:
+- Metric labels and categories
+- Category weights and order
+- Chart colors
+- Value formatting (percentage/number)
+
+The dashboard updates automatically when new data is added to the `ongoing` directory
+
+## Metrics Collection Details
+
+The application collects metrics from different data sources using their respective APIs:
+
+### GitHub Metrics (Enterprise)
+- `a_active_users`: Uses `/enterprises/{organization}/members` endpoint
+- `a_ai_adoption_rate`: Uses `/enterprises/{organization}/members` and Copilot usage endpoints
+- `a_ai_usage`: Uses `/enterprises/{organization}/copilot/chat-stats` endpoint
+- `a_code_suggestions`: Uses `/enterprises/{organization}/copilot/usage` with `granularity=day`
+- `a_code_accepted`: Uses same endpoint as code suggestions
+
+### Bitbucket Metrics
+- `s_merged_prs`: Uses `/rest/api/1.0/projects/{project}/repos/{repo}/pull-requests` with `state=MERGED`
+- `s_pr_review_time`: Uses pull requests endpoint plus `/activities` to calculate time between creation and approval
+
+### JIRA Metrics
+- `s_story_points`: Uses `/rest/api/2/search` with JQL query for completed issues and story points field (customfield_10002)
+
+### SonarQube Metrics
+- `q_code_smells`: Uses `/api/issues/search` with type=CODE_SMELL
+- `q_bugs`: Uses `/api/issues/search` with type=BUG
+- `q_vulnerabilities`: Uses `/api/issues/search` with type=VULNERABILITY
+
+### Jenkins Metrics
+- `q_coverage`: Retrieves from build actions, supporting JaCoCo, Cobertura, and generic coverage reports
+- `d_deployment_frequency`: Uses builds API to count successful deployments
+
+### Experience Metrics
+- `e_user_satisfaction`: Manually added from survey results
+- `e_adoption`: Manually added from survey results
+- `e_productivity`: Manually added from survey results
+- `e_use_cases`: Manually added from survey results
+
+All API endpoints support both token-based and username/password authentication. Each request includes appropriate date filters (start/end) based on the specified year and month.
