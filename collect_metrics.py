@@ -129,54 +129,62 @@ def main():
     
     for project in projects_config['projects']:
         print(f"Collecting metrics for project: {project}")
-        
-        # Collect merged PRs
+          # Collect merged PRs
         merged_prs = collector.collect_metric('merged_pr', project, year, month)
-        consolidated_results['s_merged_prs'] += merged_prs
+        if merged_prs is not None:
+            consolidated_results['s_merged_prs'] += merged_prs
         
         # Collect PR review time
         pr_review_time = collector.collect_metric('pr_review_time', project, year, month)
-        consolidated_results['s_pr_review_time'] += pr_review_time
-        
-        # Collect bugs from SonarQube
+        if pr_review_time is not None:
+            consolidated_results['s_pr_review_time'] += pr_review_time
+          # Collect bugs from SonarQube
         bugs = collector.collect_metric('bugs', project, year, month)
-        consolidated_results['q_bugs'] += bugs
+        if bugs is not None:
+            consolidated_results['q_bugs'] += bugs
         
         # Collect code smells from SonarQube
         code_smells = collector.collect_metric('code_smells', project, year, month)
-        consolidated_results['q_code_smells'] += code_smells
-
-        # Collect code coverage
+        if code_smells is not None:
+            consolidated_results['q_code_smells'] += code_smells        # Collect code coverage
         code_coverage = collector.collect_metric('code_coverage', project, year, month)
-        consolidated_results['q_coverage'] += code_coverage
-
-        # Collect vulnerabilities from SonarQube
+        if code_coverage is not None:
+            consolidated_results['q_coverage'] += code_coverage        # Collect vulnerabilities from SonarQube
         vulnerabilities = collector.collect_metric('vulnerabilities', project, year, month)
-        consolidated_results['q_vulnerabilities'] += vulnerabilities
+        if vulnerabilities is not None:
+            consolidated_results['q_vulnerabilities'] += vulnerabilities
         
         # Collect story points from JIRA
         story_points = collector.collect_metric('story_points', project, year, month)
-        consolidated_results['s_story_points'] += story_points
-        
-        # Process deployment frequency
+        if story_points is not None:
+            consolidated_results['s_story_points'] += story_points
+          # Process deployment frequency
         if 'deployments' in projects_config:
+            print("Collecting deployment metrics...")
             for deployment in projects_config['deployments']:
                 deployment_freq = collector.collect_metric('deployment_frequency', deployment, year, month)
-                consolidated_results['d_deployment_frequency'] += deployment_freq
-        
-    # Process deployment frequency 
-    if 'deployments' in projects_config:
-        print("Collecting deployment metrics...")
-        for deployment in projects_config['deployments']:
-            deployment_freq = collector.collect_metric('deployment_frequency', deployment, year, month)
-            consolidated_results['d_deployment_frequency'] += deployment_freq
+                if deployment_freq is not None:
+                    consolidated_results['d_deployment_frequency'] += deployment_freq
+      # Collect organization-wide metrics once (for GitHub/Copilot metrics)
+    active_users = collector.collect_metric('active_users', org_name, year, month)
+    if active_users is not None:
+        consolidated_results['a_active_users'] = active_users
     
-    # Collect organization-wide metrics once (for GitHub/Copilot metrics)
-    consolidated_results['a_active_users'] = collector.collect_metric('active_users', org_name, year, month)
-    consolidated_results['a_ai_usage'] = collector.collect_metric('ai_usage', org_name, year, month)
-    consolidated_results['a_code_suggestions'] = collector.collect_metric('suggested_lines', org_name, year, month)
-    consolidated_results['a_code_accepted'] = collector.collect_metric('accepted_lines', org_name, year, month)
-    consolidated_results['a_ai_adoption_rate'] = collector.collect_metric('adoption_rate', org_name, year, month)
+    ai_usage = collector.collect_metric('ai_usage', org_name, year, month)
+    if ai_usage is not None:
+        consolidated_results['a_ai_usage'] = ai_usage
+    
+    code_suggestions = collector.collect_metric('suggested_lines', org_name, year, month)
+    if code_suggestions is not None:
+        consolidated_results['a_code_suggestions'] = code_suggestions
+    
+    code_accepted = collector.collect_metric('accepted_lines', org_name, year, month)
+    if code_accepted is not None:
+        consolidated_results['a_code_accepted'] = code_accepted
+    
+    ai_adoption_rate = collector.collect_metric('adoption_rate', org_name, year, month)
+    if ai_adoption_rate is not None:
+        consolidated_results['a_ai_adoption_rate'] = ai_adoption_rate
     
     # Average the percentage metrics
     for metric in percentage_metrics:
