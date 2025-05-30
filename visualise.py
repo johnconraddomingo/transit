@@ -8,7 +8,7 @@ import json
 from datetime import datetime
 
 # Define the path to the metrics mapping and category weights
-def load_config(config_path="config/dashboard_config.json"):
+def load_config(config_path="config/dashboard.json"):
     with open(config_path, "r") as f:
         return json.load(f)
 
@@ -165,7 +165,7 @@ def calculate_weighted_productivity_index(metrics_data, metrics_by_category, bas
         for metric_key in metric_keys:
             if metric_key in metrics_data and metric_key in config["metrics_mapping"]:
                 current_value = metrics_data[metric_key]
-                baseline_value = baseline_data.get(metric_key)
+                baseline_value = baseline_data[metric_key] if metric_key in baseline_data else None
                 
                 if baseline_value is not None:
                     is_inverse = config["metrics_mapping"][metric_key].get('inverse', False)
@@ -219,7 +219,7 @@ def generate_simple_dashboard(baseline_dir=None, ongoing_dir=None, output_dir=No
     current_dir = os.path.dirname(os.path.abspath(__file__))
     baseline_dir = baseline_dir or os.path.join(current_dir, "baseline")
     ongoing_dir = ongoing_dir or os.path.join(current_dir, "ongoing")
-    output_dir = output_dir or os.path.join(current_dir, "src", "Dashboards")
+    output_dir = output_dir or os.path.join(current_dir, "reports")
     os.makedirs(output_dir, exist_ok=True)
     
     print("Loading data...")
@@ -231,6 +231,12 @@ def generate_simple_dashboard(baseline_dir=None, ongoing_dir=None, output_dir=No
     # Get the latest data point
     latest_date = max(time_series_data.keys()) if time_series_data else None
     latest_data = time_series_data.get(latest_date, {}) if latest_date else {}
+    
+    # If there's no ongoing data but baseline data exists, use baseline data as the current values
+    if not latest_data and baseline_data:
+        print("No ongoing data found. Using baseline data for display.")
+        print(f"Baseline data type: {type(baseline_data)}")
+        latest_data = baseline_data.copy()
     
     # Group metrics by category
     metrics_by_category = {}
@@ -593,7 +599,7 @@ def generate_simple_dashboard(baseline_dir=None, ongoing_dir=None, output_dir=No
     <div class="dashboard-header">
         <h1 class="dashboard-title">{config["dashboard_title"]}</h1>
         <p class="dashboard-subtitle">
-            Data from {latest_date.strftime('%B %Y') if latest_date else 'No data'} compared to baseline
+            {latest_date.strftime('Data from %B %Y compared to baseline') if latest_date else 'Baseline data only - No historical data available'}
         </p>
     </div>
     """
@@ -612,7 +618,8 @@ def generate_simple_dashboard(baseline_dir=None, ongoing_dir=None, output_dir=No
         for metric_key in metrics_by_category[category]:
             if metric_key in latest_data:
                 current_value = latest_data[metric_key]
-                baseline_value = baseline_data.get(metric_key)
+                print(f"Processing metric: {metric_key}, baseline_data type: {type(baseline_data)}")
+                baseline_value = baseline_data[metric_key] if metric_key in baseline_data else None
                 
                 # Calculate trend
                 trend_pct = calculate_trend(current_value, baseline_value) if baseline_value is not None else None
@@ -646,33 +653,48 @@ def generate_simple_dashboard(baseline_dir=None, ongoing_dir=None, output_dir=No
                 </div>
                 """
                 
-                # Add historical data
-                html_content += """
-                <div class="metric-history">
-                    <strong>Historical Data</strong>
-                """
-                
-                # Add historical data points
-                for date in sorted_dates:
-                    if metric_key in time_series_data[date]:
-                        value = time_series_data[date][metric_key]
-                        formatted_value = format_value(value, format_type)
-                        month_year = date.strftime('%b %Y')
-                        
-                        html_content += f"""
-                    <div class="metric-history-item">
-                        <span>{month_year}</span>
-                        <span>{formatted_value}</span>
-                    </div>
-                        """
-                
-                html_content += """
-                </div>
-                """
-                
-                # Add line graph
+                # Add historical data if available
                 if sorted_dates:
-                    # Create chart data for JavaScript
+                    html_content += """
+                    <div class="metric-history">
+                        <strong>Historical Data</strong>
+                    """
+                    
+                    # Add historical data points
+                    for date in sorted_dates:
+                        if metric_key in time_series_data[date]:
+                            value = time_series_data[date][metric_key]
+                            formatted_value = format_value(value, format_type)
+                            month_year = date.strftime('%b %Y')
+                            
+                            html_content += f"""
+                        <div class="metric-history-item">
+                            <span>{month_year}</span>
+                            <span>{formatted_value}</span>
+                        </div>
+                            """
+                    
+                    html_content += """
+                    </div>
+                    """
+                
+                # Configure chart options
+                chart_options = {
+                    'lineColor': category_color,
+                    'isPercentage': format_type == 'percentage'
+                }
+                
+                if baseline_value is not None:
+                    chart_options['baselineValue'] = baseline_value
+                
+                # Create unique ID for this chart
+                chart_id = f"chart_{metric_key}"
+                
+                # Add chart to HTML - either with time series data or just baseline
+                import json
+                
+                if sorted_dates:
+                    # Add line graph with historical data
                     chart_data = []
                     for date in sorted_dates:
                         if metric_key in time_series_data[date]:
@@ -682,38 +704,36 @@ def generate_simple_dashboard(baseline_dir=None, ongoing_dir=None, output_dir=No
                                 'value': value
                             })
                     
-                    # Add baseline to options
-                    chart_options = {
-                        'lineColor': category_color,
-                        'isPercentage': format_type == 'percentage'
-                    }
-                    
-                    if baseline_value is not None:
-                        chart_options['baselineValue'] = baseline_value
-                    
-                    # Create unique ID for this chart
-                    chart_id = f"chart_{metric_key}"
-                    
-                    # Add chart to HTML
-                    import json
                     html_content += f"""
-                <div class="chart-container">
-                    <canvas id="{chart_id}" 
-                            class="chart-canvas" 
-                            data-chart='{json.dumps(chart_data)}' 
-                            data-options='{json.dumps(chart_options)}'></canvas>
-                </div>
-                <div class="chart-legend">
-                    <div class="legend-item">
-                        <span class="legend-color" style="background-color: {category_color};"></span>
-                        <span>Actual</span>
+                    <div class="chart-container">
+                        <canvas id="{chart_id}" 
+                                class="chart-canvas" 
+                                data-chart='{json.dumps(chart_data)}' 
+                                data-options='{json.dumps(chart_options)}'></canvas>
                     </div>
-                    <div class="legend-item">
-                        <span class="legend-color" style="background-color: #CCCCCC;"></span>
-                        <span>Baseline</span>
+                    <div class="chart-legend">
+                        <div class="legend-item">
+                            <span class="legend-color" style="background-color: {category_color};"></span>
+                            <span>Actual</span>
+                        </div>
+                        <div class="legend-item">
+                            <span class="legend-color" style="background-color: #CCCCCC;"></span>
+                            <span>Baseline</span>
+                        </div>
                     </div>
-                </div>
-                """
+                    """
+                else:
+                    # Just show the baseline value as a horizontal line
+                    # Create a minimal dataset with the baseline value (show as a point)
+                    baseline_chart_data = [{"label": "Baseline", "value": baseline_value or 0}]
+                    
+                    html_content += f"""
+                    <div class="chart-container">
+                        <div class="baseline-only-message" style="text-align: center; padding: 20px; color: #586069;">
+                            No historical data available - Only baseline data shown
+                        </div>
+                    </div>
+                    """
                 
                 html_content += """
             </div>
@@ -724,18 +744,22 @@ def generate_simple_dashboard(baseline_dir=None, ongoing_dir=None, output_dir=No
     </div>
         """
     
-    # Add productivity metrics summary table
-    html_content += """
+    # Add metrics summary table
+    summary_title = "Baseline Metrics Summary" if not sorted_dates else "Productivity Metrics Dashboard"
+    new_average_label = "Value" if not sorted_dates else "New Average"
+    improvement_label = "Analysis" if not sorted_dates else "Productivity Comparison"
+
+    html_content += f"""
     <div class="productivity-summary">
-        <div class="productivity-header">Productivity Metrics Dashboard</div>
+        <div class="productivity-header">{summary_title}</div>
         <table class="productivity-table">
             <thead>
                 <tr>
                     <th>Dimension</th>
                     <th>Metric</th>
                     <th>Baseline</th>
-                    <th>New Average</th>
-                    <th>Productivity Comparison</th>
+                    <th>{new_average_label}</th>
+                    <th>{improvement_label}</th>
                     <th>Weight</th>
                     <th>Index Input</th>
                 </tr>
@@ -777,8 +801,9 @@ def generate_simple_dashboard(baseline_dir=None, ongoing_dir=None, output_dir=No
                 </tr>
                 """
     
-    # Close the table and add overall productivity index
-    html_content += f"""
+    # Close the table and add overall productivity index or baseline message
+    if sorted_dates:
+        html_content += f"""
             </tbody>
         </table>
         
@@ -789,7 +814,17 @@ def generate_simple_dashboard(baseline_dir=None, ongoing_dir=None, output_dir=No
             <em>This index reflects the weighted improvement across all tracked metrics, providing a holistic view of productivity gains.</em>
         </div>
     </div>
-    """
+        """
+    else:
+        html_content += f"""
+            </tbody>
+        </table>
+        
+        <div class="productivity-note" style="margin-top: 20px; text-align: center;">
+            <em>Baseline metrics are displayed. Add ongoing data to see historical trends and productivity comparisons.</em>
+        </div>
+    </div>
+        """
     
     # Add footer
     generation_date = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
@@ -810,4 +845,11 @@ def generate_simple_dashboard(baseline_dir=None, ongoing_dir=None, output_dir=No
     return output_file
 
 if __name__ == "__main__":
-    generate_simple_dashboard()
+    # Check for command line arguments
+    if len(sys.argv) > 1:
+        baseline_dir = sys.argv[1] if len(sys.argv) > 1 else None
+        ongoing_dir = sys.argv[2] if len(sys.argv) > 2 else None
+        output_dir = sys.argv[3] if len(sys.argv) > 3 else None
+        generate_simple_dashboard(baseline_dir, ongoing_dir, output_dir)
+    else:
+        generate_simple_dashboard()

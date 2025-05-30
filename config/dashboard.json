@@ -1,7 +1,12 @@
-
 {
   "dashboard_title": "GitHub Copilot Metrics Framework",
-  "category_order": ["Adoption", "Speed", "Quality", "Experience", "Delivery"],
+  "category_order": [
+    "Adoption",
+    "Speed",
+    "Quality",
+    "Experience",
+    "Delivery"
+  ],
   "category_weights": {
     "Adoption": 0.0,
     "Speed": 0.38,
