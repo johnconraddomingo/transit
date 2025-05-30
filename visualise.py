@@ -248,8 +248,11 @@ def calculate_weighted_productivity_index(metrics_data, metrics_by_category, bas
                 "total_improvement": category_total_improvement
             }
             
-            # Add to overall index
+        # Add to overall index
             productivity_data["overall_index"] += category_total_improvement
+    
+    # Round the overall index to 2 decimal places for consistency with display
+    productivity_data["overall_index"] = round(productivity_data["overall_index"], 2)
     
     return productivity_data
 
@@ -301,10 +304,20 @@ def generate_simple_dashboard(baseline_dir=None, ongoing_dir=None, output_dir=No
     )
 
     # Sort dates chronologically for time series
-    sorted_dates = sorted(time_series_data.keys()) if time_series_data else []
-      # Calculate the weighted productivity index
+    sorted_dates = sorted(time_series_data.keys()) if time_series_data else []    # Calculate the weighted productivity index
     productivity_data = calculate_weighted_productivity_index(latest_data, metrics_by_category, baseline_data, average_data)
-    overall_index = productivity_data["overall_index"]
+    
+    # Recalculate overall index by summing the rounded individual contributions for display consistency
+    sum_of_displayed_contributions = 0.0
+    for category_name, category_data in productivity_data["categories"].items():
+        for metric in category_data["metrics"]:
+            displayed_improvement = float(f"{metric['improvement_pct']:.2f}")
+            displayed_weight = float(f"{metric['weight_pct']:.1f}")
+            precise_contribution = (displayed_improvement * displayed_weight / 100)
+            sum_of_displayed_contributions += precise_contribution
+    
+    # Use the sum of displayed contributions as the overall index for consistency
+    overall_index = round(sum_of_displayed_contributions, 2)
     
     # JavaScript for line charts (outside of Python f-string)
     js_code = """
@@ -387,8 +400,7 @@ def generate_simple_dashboard(baseline_dir=None, ongoing_dir=None, output_dir=No
                 ctx.textAlign = 'left';
                 ctx.fillText('Baseline', padding, baselineY - 5);
             }
-            
-            // Draw value line
+              // Draw value line
             ctx.strokeStyle = lineColor;
             ctx.lineWidth = 2;
             ctx.beginPath();
@@ -402,6 +414,15 @@ def generate_simple_dashboard(baseline_dir=None, ongoing_dir=None, output_dir=No
                 } else {
                     ctx.lineTo(x, y);
                 }
+            }
+            
+            // Stroke the line connecting all points
+            ctx.stroke();
+            
+            // Draw points on top of the line
+            for (var j = 0; j < data.length; j++) {
+                var x = getX(j);
+                var y = getY(data[j].value);
                 
                 // Draw point
                 ctx.fillStyle = lineColor;
@@ -415,8 +436,6 @@ def generate_simple_dashboard(baseline_dir=None, ongoing_dir=None, output_dir=No
                 ctx.textAlign = 'center';
                 ctx.fillText(data[j].label, x, height - padding + 15);
             }
-            
-            ctx.stroke();
             
             // Draw y-axis labels
             ctx.fillStyle = textColor;
@@ -880,7 +899,7 @@ def generate_simple_dashboard(baseline_dir=None, ongoing_dir=None, output_dir=No
         </table>
         
         <div class="productivity-index">
-            <strong>Overall Productivity Index:</strong> {overall_index:.2f}%
+            Overall Productivity Index: <strong>{overall_index:.2f}%</strong>
         </div>
         <div class="productivity-note">
             <em>This index reflects the weighted improvement across all tracked metrics, providing a holistic view of productivity gains.</em>
