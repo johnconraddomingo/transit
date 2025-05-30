@@ -2,6 +2,7 @@
 __pycache__/
 src/data_sources/__pycache__
 src/metrics/__pycache__
+src/metrics/exporters/__pycache__
 *.py[cod]
 *$py.class
 
@@ -43,4 +44,3 @@ reports/*
 # Coverage reports
 .coverage
 htmlcov/
-reports
