@@ -122,6 +122,41 @@ You'll know the virtual environment is activated when you see `(venv)` at the be
    
    > **Note**: For GitHub, token authentication is strongly recommended as username/password authentication is deprecated for the GitHub API. Use a Personal Access Token with the appropriate scopes.
 
+## Metrics Collection Details
+
+The application collects metrics from different data sources using their respective APIs:
+
+### GitHub Metrics (Enterprise)
+- `a_active_users`: Uses `/enterprises/{organization}/members` endpoint
+- `a_ai_adoption_rate`: Uses `/enterprises/{organization}/members` and Copilot usage endpoints
+- `a_ai_usage`: Uses `/enterprises/{organization}/copilot/chat-stats` endpoint
+- `a_code_suggestions`: Uses `/enterprises/{organization}/copilot/usage` with `granularity=day`
+- `a_code_accepted`: Uses same endpoint as code suggestions
+
+### Bitbucket Metrics
+- `s_merged_prs`: Uses `/rest/api/1.0/projects/{project}/repos/{repo}/pull-requests` with `state=MERGED`
+- `s_pr_review_time`: Uses pull requests endpoint plus `/activities` to calculate time between creation and approval
+
+### JIRA Metrics
+- `s_story_points`: Uses `/rest/api/2/search` with JQL query for completed issues and story points field (customfield_10002)
+
+### SonarQube Metrics
+- `q_code_smells`: Uses `/api/issues/search` with type=CODE_SMELL
+- `q_bugs`: Uses `/api/issues/search` with type=BUG
+- `q_vulnerabilities`: Uses `/api/issues/search` with type=VULNERABILITY
+
+### Jenkins Metrics
+- `q_coverage`: Retrieves from build actions, supporting JaCoCo, Cobertura, and generic coverage reports
+- `d_deployment_frequency`: Uses builds API to count successful deployments
+
+### Experience Metrics
+- `e_user_satisfaction`: Manually added from survey results
+- `e_adoption`: Manually added from survey results
+- `e_productivity`: Manually added from survey results
+- `e_use_cases`: Manually added from survey results
+
+All API endpoints support both token-based and username/password authentication. Each request includes appropriate date filters (start/end) based on the specified year and month.
+
 ## Usage
 
 Run the application with a year-month parameter:
@@ -251,37 +286,3 @@ You can customize the dashboard by modifying `config/dashboard.json`:
 
 The dashboard updates automatically when new data is added to the `ongoing` directory
 
-## Metrics Collection Details
-
-The application collects metrics from different data sources using their respective APIs:
-
-### GitHub Metrics (Enterprise)
-- `a_active_users`: Uses `/enterprises/{organization}/members` endpoint
-- `a_ai_adoption_rate`: Uses `/enterprises/{organization}/members` and Copilot usage endpoints
-- `a_ai_usage`: Uses `/enterprises/{organization}/copilot/chat-stats` endpoint
-- `a_code_suggestions`: Uses `/enterprises/{organization}/copilot/usage` with `granularity=day`
-- `a_code_accepted`: Uses same endpoint as code suggestions
-
-### Bitbucket Metrics
-- `s_merged_prs`: Uses `/rest/api/1.0/projects/{project}/repos/{repo}/pull-requests` with `state=MERGED`
-- `s_pr_review_time`: Uses pull requests endpoint plus `/activities` to calculate time between creation and approval
-
-### JIRA Metrics
-- `s_story_points`: Uses `/rest/api/2/search` with JQL query for completed issues and story points field (customfield_10002)
-
-### SonarQube Metrics
-- `q_code_smells`: Uses `/api/issues/search` with type=CODE_SMELL
-- `q_bugs`: Uses `/api/issues/search` with type=BUG
-- `q_vulnerabilities`: Uses `/api/issues/search` with type=VULNERABILITY
-
-### Jenkins Metrics
-- `q_coverage`: Retrieves from build actions, supporting JaCoCo, Cobertura, and generic coverage reports
-- `d_deployment_frequency`: Uses builds API to count successful deployments
-
-### Experience Metrics
-- `e_user_satisfaction`: Manually added from survey results
-- `e_adoption`: Manually added from survey results
-- `e_productivity`: Manually added from survey results
-- `e_use_cases`: Manually added from survey results
-
-All API endpoints support both token-based and username/password authentication. Each request includes appropriate date filters (start/end) based on the specified year and month.
