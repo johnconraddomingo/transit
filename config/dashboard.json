@@ -107,7 +107,7 @@
       "format": "number"
     },
     "d_deployment_frequency": {
-      "label": "Deployment Frequency (per week)",
+      "label": "Deployment Frequency",
       "category": "Delivery",
       "format": "number"
     }

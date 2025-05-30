@@ -144,22 +144,29 @@ def calculate_metrics_average(time_series_data, metric_key):
     
     return sum(values) / len(values)
 
-def calculate_productivity_improvement(current_value, baseline_value, is_inverse=False):
+def calculate_productivity_improvement(current_value, baseline_value, is_inverse=False, average_value=None):
     """
-    Calculate the productivity improvement percentage between current and baseline values.
+    Calculate the productivity improvement percentage between baseline and average values.
     
     Args:
-        current_value: Current metric value
+        current_value: Current metric value (used as fallback if average not available)
         baseline_value: Baseline metric value
         is_inverse: Whether a lower value is better (e.g., for bugs)
+        average_value: Average metric value (if available)
         
     Returns:
         Productivity improvement percentage
     """
-    if baseline_value is None or baseline_value == 0:
+    if baseline_value is None:
         return 0
+          # Use average value if provided, otherwise fall back to current value
+    comparison_value = average_value if average_value is not None else current_value
     
-    improvement = ((current_value - baseline_value) / abs(baseline_value)) * 100
+    if baseline_value == 0:  # Avoid division by zero
+        return 0 if baseline_value == 0 else 100
+    
+    # Formula: ((New Average - Baseline) / Baseline) * 100    
+    improvement = ((comparison_value - baseline_value) / baseline_value) * 100
     
     # For inverse metrics (where lower is better), negate the improvement
     if is_inverse:
@@ -197,24 +204,22 @@ def calculate_weighted_productivity_index(metrics_data, metrics_by_category, bas
                 current_value = metrics_data[metric_key]
                 baseline_value = baseline_data[metric_key] if metric_key in baseline_data else None
                 avg_value = average_data[metric_key] if average_data and metric_key in average_data else None
-                
+
                 if baseline_value is not None:
                     is_inverse = config["metrics_mapping"][metric_key].get('inverse', False)
-                    improvement_pct = calculate_productivity_improvement(current_value, baseline_value, is_inverse)
+                    # Calculate improvement with the new formula using average value when available
+                    improvement_pct = calculate_productivity_improvement(current_value, baseline_value, is_inverse, avg_value)
                     
-                    # Also calculate improvement against average if available
-                    avg_improvement_pct = None
-                    if avg_value is not None:
-                        avg_improvement_pct = calculate_productivity_improvement(current_value, avg_value, is_inverse)
+                    # Calculate avg_improvement_pct directly using the same formula
+                    avg_improvement_pct = improvement_pct
                     
                     # Weight per metric is the category weight divided by number of metrics in category
                     metric_count = len(metric_keys)
                     metric_weight = category_weight / metric_count if metric_count > 0 else 0
                     
                     # Weight percentage formatted for display
-                    weight_pct = metric_weight * 100
-                    
-                    # Calculate weighted contribution to the index
+                    weight_pct = metric_weight * 100                    # Calculate weighted contribution to the index
+                    # Apply improvement percentage to the metric weight to get weighted contribution
                     weighted_contribution = improvement_pct * metric_weight
                     
                     metric_data = {
@@ -692,7 +697,7 @@ def generate_simple_dashboard(baseline_dir=None, ongoing_dir=None, output_dir=No
                 <div class="metric-title">{config["metrics_mapping"][metric_key].get('label', metric_key)}</div>
                 <div class="metric-value">{formatted_current}</div>
                 <div class="metric-baseline">Baseline: {formatted_baseline}</div>
-                <div class="metric-average">Average: {formatted_average}</div>
+                <div class="metric-average">New Average: {formatted_average}</div>
                 """
                 
                 if trend_pct is not None:
@@ -812,7 +817,7 @@ def generate_simple_dashboard(baseline_dir=None, ongoing_dir=None, output_dir=No
                     <th>Metric</th>
                     <th>Baseline</th>
                     <th>{latest_value_label}</th>
-                    <th>Average</th>
+                    <th>New Average</th>
                     <th>{improvement_label}</th>
                     <th>Weight</th>
                     <th>Index Input</th>
@@ -825,12 +830,11 @@ def generate_simple_dashboard(baseline_dir=None, ongoing_dir=None, output_dir=No
     for category_name in sorted_categories:
         if category_name in productivity_data["categories"]:
             category_data = productivity_data["categories"][category_name]
-            
             # Add category header row
             html_content += f"""
                 <tr class="category-header-row">
                     <td><strong>{category_name}</strong></td>
-                    <td colspan="6"></td>
+                    <td colspan="7"></td>
                 </tr>
             """
             
@@ -839,14 +843,22 @@ def generate_simple_dashboard(baseline_dir=None, ongoing_dir=None, output_dir=No
                 # Format the metric values
                 baseline_val = format_value(metric["baseline"], config["metrics_mapping"][metric["key"]].get("format", "number"))
                 current_val = format_value(metric["current"], config["metrics_mapping"][metric["key"]].get("format", "number"))
-                
-                # Get and format the average value
+                  # Get and format the average value
                 avg_value = average_data.get(metric["key"])
-                avg_val = format_value(avg_value, config["metrics_mapping"][metric["key"]].get("format", "number")) if avg_value is not None else 'N/A'
+                avg_val = format_value(avg_value, config["metrics_mapping"][metric["key"]].get("format", "number")) if avg_value is not None else 'N/A'                # Calculate the displayed improvement percentage (as a string without the % sign)
+                displayed_improvement = f"{metric['improvement_pct']:.2f}"
+                displayed_weight = f"{metric['weight_pct']:.1f}"
                 
-                improvement_pct = f"{metric['improvement_pct']:.2f}%"
-                weight_pct = f"{metric['weight_pct']:.0f}%"
-                index_input = f"{metric['weighted_contribution']:.2f}%"
+                # Convert the displayed values back to floats and calculate the index input
+                # This ensures consistency between what's shown in the table
+                displayed_improvement_float = float(displayed_improvement)
+                displayed_weight_float = float(displayed_weight)
+                precise_contribution = (displayed_improvement_float * displayed_weight_float / 100)
+                
+                # Format for display
+                improvement_pct = f"{displayed_improvement}%"
+                weight_pct = f"{displayed_weight}%"
+                index_input = f"{precise_contribution:.2f}%"
                 
                 html_content += f"""
                 <tr>

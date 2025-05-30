@@ -43,3 +43,4 @@ reports/*
 # Coverage reports
 .coverage
 htmlcov/
+reports
