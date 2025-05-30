@@ -74,7 +74,15 @@ def load_all_data(baseline_folder, ongoing_folder):
                     time_series_data[date] = data
                     print(f"Loaded {filename} with {len(data)} metrics")
     
-    return baseline_data, time_series_data
+    # Calculate averages across all time periods
+    average_data = {}
+    if time_series_data:
+        for metric in config["metrics_mapping"]:
+            avg_value = calculate_metrics_average(time_series_data, metric)
+            if avg_value is not None:
+                average_data[metric] = avg_value
+    
+    return baseline_data, time_series_data, average_data
 
 def format_value(value, format_type):
     """
@@ -115,6 +123,27 @@ def get_trend_color(trend_pct, inverse=False):
     else:
         return "#FBBC05"  # Yellow for neutral
 
+def calculate_metrics_average(time_series_data, metric_key):
+    """
+    Calculate the average value for a metric across all available time periods.
+    
+    Args:
+        time_series_data: Dictionary of time series data with dates as keys
+        metric_key: The metric key to calculate the average for
+        
+    Returns:
+        Average value of the metric or None if no data available
+    """
+    values = []
+    for date, data in time_series_data.items():
+        if metric_key in data:
+            values.append(data[metric_key])
+    
+    if not values:
+        return None
+    
+    return sum(values) / len(values)
+
 def calculate_productivity_improvement(current_value, baseline_value, is_inverse=False):
     """
     Calculate the productivity improvement percentage between current and baseline values.
@@ -138,7 +167,7 @@ def calculate_productivity_improvement(current_value, baseline_value, is_inverse
         
     return improvement
 
-def calculate_weighted_productivity_index(metrics_data, metrics_by_category, baseline_data):
+def calculate_weighted_productivity_index(metrics_data, metrics_by_category, baseline_data, average_data=None):
     """
     Calculate the weighted productivity index based on all metrics and their category weights.
     
@@ -146,6 +175,7 @@ def calculate_weighted_productivity_index(metrics_data, metrics_by_category, bas
         metrics_data: Dictionary with metrics and their values
         metrics_by_category: Dictionary grouping metrics by their categories
         baseline_data: Dictionary with baseline metric values
+        average_data: Optional dictionary with average metrics values
         
     Returns:
         Dictionary with overall index value and details per category
@@ -166,10 +196,16 @@ def calculate_weighted_productivity_index(metrics_data, metrics_by_category, bas
             if metric_key in metrics_data and metric_key in config["metrics_mapping"]:
                 current_value = metrics_data[metric_key]
                 baseline_value = baseline_data[metric_key] if metric_key in baseline_data else None
+                avg_value = average_data[metric_key] if average_data and metric_key in average_data else None
                 
                 if baseline_value is not None:
                     is_inverse = config["metrics_mapping"][metric_key].get('inverse', False)
                     improvement_pct = calculate_productivity_improvement(current_value, baseline_value, is_inverse)
+                    
+                    # Also calculate improvement against average if available
+                    avg_improvement_pct = None
+                    if avg_value is not None:
+                        avg_improvement_pct = calculate_productivity_improvement(current_value, avg_value, is_inverse)
                     
                     # Weight per metric is the category weight divided by number of metrics in category
                     metric_count = len(metric_keys)
@@ -181,7 +217,7 @@ def calculate_weighted_productivity_index(metrics_data, metrics_by_category, bas
                     # Calculate weighted contribution to the index
                     weighted_contribution = improvement_pct * metric_weight
                     
-                    category_metrics.append({
+                    metric_data = {
                         "key": metric_key,
                         "name": config["metrics_mapping"][metric_key].get("label", metric_key),
                         "baseline": baseline_value,
@@ -189,8 +225,14 @@ def calculate_weighted_productivity_index(metrics_data, metrics_by_category, bas
                         "improvement_pct": improvement_pct,
                         "weight_pct": weight_pct,
                         "weighted_contribution": weighted_contribution
-                    })
+                    }
                     
+                    # Add average data if available
+                    if avg_value is not None:
+                        metric_data["average"] = avg_value
+                        metric_data["avg_improvement_pct"] = avg_improvement_pct
+                    
+                    category_metrics.append(metric_data)
                     category_total_improvement += weighted_contribution
         
         # Add category data to results
@@ -223,10 +265,11 @@ def generate_simple_dashboard(baseline_dir=None, ongoing_dir=None, output_dir=No
     os.makedirs(output_dir, exist_ok=True)
     
     print("Loading data...")
-    baseline_data, time_series_data = load_all_data(baseline_dir, ongoing_dir)
+    baseline_data, time_series_data, average_data = load_all_data(baseline_dir, ongoing_dir)
     
     print(f"Baseline metrics: {len(baseline_data)}")
     print(f"Time series data points: {len(time_series_data)}")
+    print(f"Average metrics: {len(average_data)}")
     
     # Get the latest data point
     latest_date = max(time_series_data.keys()) if time_series_data else None
@@ -237,7 +280,7 @@ def generate_simple_dashboard(baseline_dir=None, ongoing_dir=None, output_dir=No
         print("No ongoing data found. Using baseline data for display.")
         print(f"Baseline data type: {type(baseline_data)}")
         latest_data = baseline_data.copy()
-    
+        
     # Group metrics by category
     metrics_by_category = {}
     for metric_key, metadata in config["metrics_mapping"].items():
@@ -254,9 +297,8 @@ def generate_simple_dashboard(baseline_dir=None, ongoing_dir=None, output_dir=No
 
     # Sort dates chronologically for time series
     sorted_dates = sorted(time_series_data.keys()) if time_series_data else []
-    
-    # Calculate the weighted productivity index
-    productivity_data = calculate_weighted_productivity_index(latest_data, metrics_by_category, baseline_data)
+      # Calculate the weighted productivity index
+    productivity_data = calculate_weighted_productivity_index(latest_data, metrics_by_category, baseline_data, average_data)
     overall_index = productivity_data["overall_index"]
     
     # JavaScript for line charts (outside of Python f-string)
@@ -490,6 +532,12 @@ def generate_simple_dashboard(baseline_dir=None, ongoing_dir=None, output_dir=No
         .metric-baseline {{
             font-size: 14px;
             color: #586069;
+            margin-bottom: 5px;
+        }}
+        .metric-average {{
+            font-size: 14px;
+            color: #0366d6;
+            font-weight: 500;
             margin-bottom: 10px;
         }}
         .metric-trend {{
@@ -635,11 +683,16 @@ def generate_simple_dashboard(baseline_dir=None, ongoing_dir=None, output_dir=No
                 formatted_current = format_value(current_value, format_type)
                 formatted_baseline = format_value(baseline_value, format_type) if baseline_value is not None else 'N/A'
                 
+                # Get average if available
+                average_value = average_data.get(metric_key)
+                formatted_average = format_value(average_value, format_type) if average_value is not None else 'N/A'
+                
                 html_content += f"""
             <div class="metric-card">
                 <div class="metric-title">{config["metrics_mapping"][metric_key].get('label', metric_key)}</div>
                 <div class="metric-value">{formatted_current}</div>
                 <div class="metric-baseline">Baseline: {formatted_baseline}</div>
+                <div class="metric-average">Average: {formatted_average}</div>
                 """
                 
                 if trend_pct is not None:
@@ -746,7 +799,7 @@ def generate_simple_dashboard(baseline_dir=None, ongoing_dir=None, output_dir=No
     
     # Add metrics summary table
     summary_title = "Baseline Metrics Summary" if not sorted_dates else "Productivity Metrics Dashboard"
-    new_average_label = "Value" if not sorted_dates else "New Average"
+    latest_value_label = "Latest Value" if sorted_dates else "Value"
     improvement_label = "Analysis" if not sorted_dates else "Productivity Comparison"
 
     html_content += f"""
@@ -758,7 +811,8 @@ def generate_simple_dashboard(baseline_dir=None, ongoing_dir=None, output_dir=No
                     <th>Dimension</th>
                     <th>Metric</th>
                     <th>Baseline</th>
-                    <th>{new_average_label}</th>
+                    <th>{latest_value_label}</th>
+                    <th>Average</th>
                     <th>{improvement_label}</th>
                     <th>Weight</th>
                     <th>Index Input</th>
@@ -785,6 +839,11 @@ def generate_simple_dashboard(baseline_dir=None, ongoing_dir=None, output_dir=No
                 # Format the metric values
                 baseline_val = format_value(metric["baseline"], config["metrics_mapping"][metric["key"]].get("format", "number"))
                 current_val = format_value(metric["current"], config["metrics_mapping"][metric["key"]].get("format", "number"))
+                
+                # Get and format the average value
+                avg_value = average_data.get(metric["key"])
+                avg_val = format_value(avg_value, config["metrics_mapping"][metric["key"]].get("format", "number")) if avg_value is not None else 'N/A'
+                
                 improvement_pct = f"{metric['improvement_pct']:.2f}%"
                 weight_pct = f"{metric['weight_pct']:.0f}%"
                 index_input = f"{metric['weighted_contribution']:.2f}%"
@@ -795,6 +854,7 @@ def generate_simple_dashboard(baseline_dir=None, ongoing_dir=None, output_dir=No
                     <td>{metric["name"]}</td>
                     <td>{baseline_val}</td>
                     <td>{current_val}</td>
+                    <td>{avg_val}</td>
                     <td>{improvement_pct}</td>
                     <td>{weight_pct}</td>
                     <td>{index_input}</td>

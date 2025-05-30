@@ -38,6 +38,7 @@ Thumbs.db
 # Output data
 ongoing/*
 !ongoing/.gitkeep
+reports/*
 
 # Coverage reports
 .coverage
