@@ -127,10 +127,10 @@ You'll know the virtual environment is activated when you see `(venv)` at the be
 The application collects metrics from different data sources using their respective APIs:
 
 ### GitHub Metrics (Enterprise)
-- `a_active_users`: Uses `/enterprises/{organization}/members` endpoint
-- `a_ai_adoption_rate`: Uses `/enterprises/{organization}/members` and Copilot usage endpoints
-- `a_ai_usage`: Uses `/enterprises/{organization}/copilot/chat-stats` endpoint
-- `a_code_suggestions`: Uses `/enterprises/{organization}/copilot/usage` with `granularity=day`
+- `a_active_users`: Uses `/orgs/{organization}/members` endpoint
+- `a_ai_adoption_rate`: Uses `/orgs/{organization}/members` and Copilot usage endpoints
+- `a_ai_usage`: Uses `/orgs/{organization}/copilot/chat-stats` endpoint
+- `a_code_suggestions`: Uses `/orgs/{organization}/copilot/usage` with `granularity=day`
 - `a_code_accepted`: Uses same endpoint as code suggestions
 
 ### Bitbucket Metrics
