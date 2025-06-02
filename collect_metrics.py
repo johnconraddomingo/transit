@@ -180,7 +180,7 @@ def main():
             consolidated_results['q_coverage'] += code_coverage
             logger.info(f"✓ Code Coverage: {code_coverage}%")
         else:
-            logger.warning(f"⚠ No code coverage data available from SonarQube for {project}")
+            logger.warning(f"⚠ No code coverage data available from Jenkins for {project}")
 
         # Collect vulnerabilities from SonarQube
         vulnerabilities = collector.collect_metric('vulnerabilities', project, year, month)
