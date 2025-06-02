@@ -72,7 +72,7 @@ class GitHubDataSource:
         
         # Construct API endpoint for Copilot users
         # Using GitHub Enterprise Reports API to get Copilot user data
-        api_endpoint = f"/enterprises/{organization}/settings/billing/copilot"
+        api_endpoint = f"/orgs/{organization}/settings/billing/copilot"
         
         # For GitHub.com with GraphQL, we would use a different approach
         # But we're using the REST API here as an example
@@ -143,7 +143,7 @@ class GitHubDataSource:
         
         # Construct API endpoint for Copilot usage metrics
         # This endpoint is available for enterprise customers
-        api_endpoint = f"/enterprises/{organization}/copilot/usage"
+        api_endpoint = f"/orgs/{organization}/copilot/usage"
         
         params = {
             "start_date": start_date,
@@ -262,7 +262,7 @@ class GitHubDataSource:
         
         # Construct API endpoint for Copilot usage metrics
         # This endpoint is available for enterprise customers
-        api_endpoint = f"/enterprises/{organization}/copilot/usage"
+        api_endpoint = f"/orgs/{organization}/copilot/usage"
         
         params = {
             "start_date": start_date,
@@ -384,7 +384,7 @@ class GitHubDataSource:
         end_date = f"{year}-{month}-{last_day}T23:59:59Z"
         
         # Construct API endpoint for organization members count
-        api_endpoint = f"/enterprises/{organization}/members"
+        api_endpoint = f"/orgs/{organization}/members"
         url = urljoin(self.base_url, api_endpoint)
         
         try:
@@ -482,7 +482,7 @@ class GitHubDataSource:
         end_date = f"{year}-{month}-{last_day}T23:59:59Z"
         
         # Construct API endpoint for Copilot Chat statistics
-        api_endpoint = f"/enterprises/{organization}/copilot/chat-stats"
+        api_endpoint = f"/orgs/{organization}/copilot/chat-stats"
         
         params = {
             "start_date": start_date,
