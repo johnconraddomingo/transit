@@ -467,8 +467,7 @@ class GitHubDataSource:
             month (str): Month (e.g. "05")
             
         Returns:
-            dict: Dictionary containing AI usage metrics with the format:
-                {"timestamp": ISO8601 date, "total_chats": int}
+            int: Total number of GitHub Copilot Chat interactions
         """
         # Calculate start and end dates for the month
         year_int = int(year)
@@ -492,74 +491,18 @@ class GitHubDataSource:
         url = urljoin(self.base_url, api_endpoint)
         
         try:
-            # Query the GitHub API for Copilot Chat statistics
+            # Make the API request
             if self.auth:
-                response = requests.get(url, headers=self.headers, auth=self.auth, params=params)
+                response = requests.get(url, auth=self.auth, headers=self.headers, params=params)
             else:
                 response = requests.get(url, headers=self.headers, params=params)
                 
             response.raise_for_status()
             data = response.json()
             
-            # Format the response with timestamp
-            timestamp = f"{year}-{month}-{last_day}T23:59:59Z"
-            return {
-                "timestamp": timestamp,
-                "total_chats": data.get('total_chats', 0)
-            }
+            # Extract just the total_chats value from the response
+            return data.get('total_chats', 0)
             
         except requests.exceptions.RequestException as e:
-            print(f"Error fetching GitHub Copilot Chat usage: {e}")
-            
-            # Try alternative approach with GraphQL API
-            try:
-                graphql_query = """
-                query CopilotChatUsage($org: String!, $startDate: String!, $endDate: String!) {
-                enterprise(slug: $org) {
-                    copilotChat(startDate: $startDate, endDate: $endDate) {
-                    totalChats
-                    }
-                }
-                }
-                """
-                
-                variables = {
-                    "org": organization,
-                    "startDate": start_date,
-                    "endDate": end_date
-                }
-                
-                graphql_url = urljoin(self.base_url, "/api/graphql")
-                
-                graphql_headers = self.headers.copy()
-                graphql_headers['Content-Type'] = 'application/json'
-                
-                payload = {
-                    "query": graphql_query,
-                    "variables": variables
-                }
-                
-                if self.auth:
-                    response = requests.post(graphql_url, headers=graphql_headers, auth=self.auth, json=payload)
-                else:
-                    response = requests.post(graphql_url, headers=graphql_headers, json=payload)
-                
-                response.raise_for_status()
-                graphql_data = response.json()
-                
-                total_chats = graphql_data.get('data', {}).get('enterprise', {}).get('copilotChat', {}).get('totalChats', 0)
-                
-                # Format the response with timestamp
-                timestamp = f"{year}-{month}-{last_day}T23:59:59Z"
-                return {
-                    "timestamp": timestamp,
-                    "total_chats": total_chats
-                }
-                
-            except Exception as graphql_error:
-                print(f"GraphQL fallback for chat metrics also failed: {graphql_error}")
-                timestamp = f"{year}-{month}-{last_day}T23:59:59Z"
-                return {
-                    "timestamp": timestamp,
-                    "total_chats": 0
-                }
+            print(f"Error fetching GitHub Copilot chat statistics: {e}")
+            return 0  # Return 0 if there's an error
