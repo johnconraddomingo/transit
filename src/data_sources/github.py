@@ -119,7 +119,7 @@ class GitHubDataSource:
 
     def get_copilot_suggested_lines(self, organization, year, month):
         """
-        Get the number of code lines suggested by GitHub Copilot for an organization.
+        Get the total number of code lines suggested by GitHub Copilot for an organization.
         
         Args:
             organization (str): GitHub organization name
@@ -127,8 +127,7 @@ class GitHubDataSource:
             month (str): Month (e.g. "05")
             
         Returns:
-            dict: A dictionary containing timeseries data of Copilot suggested lines
-                  Format: {"timestamp": ISO8601 date, "suggested_lines": int}
+            int: Total number of lines suggested by Copilot for the month
         """
         # Calculate start and end dates for the month
         year_int = int(year)
@@ -142,13 +141,12 @@ class GitHubDataSource:
         end_date = f"{year}-{month}-{last_day}T23:59:59Z"
         
         # Construct API endpoint for Copilot usage metrics
-        # This endpoint is available for enterprise customers
         api_endpoint = f"/orgs/{organization}/copilot/usage"
         
         params = {
             "start_date": start_date,
             "end_date": end_date,
-            "granularity": "day"  # Keep daily granularity for detailed data
+            "granularity": "month"  # Changed to monthly to get total
         }
         
         url = urljoin(self.base_url, api_endpoint)
@@ -163,82 +161,17 @@ class GitHubDataSource:
             response.raise_for_status()
             data = response.json()
             
-            # Extract suggested lines data from the response
-            # The actual structure depends on GitHub's API response format
-            results = []
-            
-            for entry in data.get('data', []):
-                suggested_lines = entry.get('suggested_lines', 0)
-                timestamp = entry.get('date')
-                
-                if timestamp and suggested_lines is not None:
-                    results.append({
-                        "timestamp": timestamp,
-                        "suggested_lines": suggested_lines
-                    })
-            
-            return results
+            # Get the total suggested lines for the month
+            total_suggested = sum(entry.get('suggested_lines', 0) for entry in data.get('data', []))
+            return total_suggested
             
         except requests.exceptions.RequestException as e:
             print(f"Error fetching GitHub Copilot suggested lines: {e}")
-            
-            # Try alternative approach with GraphQL API if REST API fails
-            try:
-                graphql_query = """
-                query CopilotMetrics($org: String!, $startDate: String!, $endDate: String!) {
-                  enterprise(slug: $org) {
-                    copilotMetrics(startDate: $startDate, endDate: $endDate) {
-                      suggestedLines
-                      date
-                    }
-                  }
-                }
-                """
-                
-                variables = {
-                    "org": organization,
-                    "startDate": start_date,
-                    "endDate": end_date
-                }
-                
-                # GraphQL endpoint is typically at /api/graphql
-                graphql_url = urljoin(self.base_url, "/api/graphql")
-                
-                # Update headers for GraphQL
-                graphql_headers = self.headers.copy()
-                graphql_headers['Content-Type'] = 'application/json'
-                
-                payload = {
-                    "query": graphql_query,
-                    "variables": variables
-                }
-                
-                if self.auth:
-                    response = requests.post(graphql_url, headers=graphql_headers, auth=self.auth, json=payload)
-                else:
-                    response = requests.post(graphql_url, headers=graphql_headers, json=payload)
-                
-                response.raise_for_status()
-                graphql_data = response.json()
-                
-                # Extract data from GraphQL response
-                metrics = graphql_data.get('data', {}).get('enterprise', {}).get('copilotMetrics', [])
-                
-                results = []
-                for metric in metrics:
-                    results.append({
-                        "timestamp": metric.get('date'),
-                        "suggested_lines": metric.get('suggestedLines', 0)
-                    })
-                
-                return results
-            except Exception as graphql_error:
-                print(f"GraphQL fallback also failed: {graphql_error}")
-                return []
+            return 0  # Return 0 if there's an error
             
     def get_copilot_accepted_lines(self, organization, year, month):
         """
-        Get the number of code lines accepted from GitHub Copilot suggestions for an organization.
+        Get the total number of code lines accepted from GitHub Copilot suggestions for an organization.
         
         Args:
             organization (str): GitHub organization name
@@ -246,8 +179,7 @@ class GitHubDataSource:
             month (str): Month (e.g. "05")
             
         Returns:
-            list: A list of dictionaries containing timeseries data of Copilot accepted lines
-                Format: [{"timestamp": ISO8601 date, "accepted_lines": int}]
+            int: Total number of lines accepted from Copilot suggestions for the month
         """
         # Calculate start and end dates for the month
         year_int = int(year)
@@ -261,13 +193,12 @@ class GitHubDataSource:
         end_date = f"{year}-{month}-{last_day}T23:59:59Z"
         
         # Construct API endpoint for Copilot usage metrics
-        # This endpoint is available for enterprise customers
         api_endpoint = f"/orgs/{organization}/copilot/usage"
         
         params = {
             "start_date": start_date,
             "end_date": end_date,
-            "granularity": "day"  # Keep daily granularity for detailed data
+            "granularity": "month"  # Changed to monthly to get total
         }
         
         url = urljoin(self.base_url, api_endpoint)
@@ -282,78 +213,13 @@ class GitHubDataSource:
             response.raise_for_status()
             data = response.json()
             
-            # Extract accepted lines data from the response
-            # The actual structure depends on GitHub's API response format
-            results = []
-            
-            for entry in data.get('data', []):
-                accepted_lines = entry.get('accepted_lines', 0)
-                timestamp = entry.get('date')
-                
-                if timestamp and accepted_lines is not None:
-                    results.append({
-                        "timestamp": timestamp,
-                        "accepted_lines": accepted_lines
-                    })
-            
-            return results
+            # Get the total accepted lines for the month
+            total_accepted = sum(entry.get('accepted_lines', 0) for entry in data.get('data', []))
+            return total_accepted
             
         except requests.exceptions.RequestException as e:
             print(f"Error fetching GitHub Copilot accepted lines: {e}")
-            
-            # Try alternative approach with GraphQL API if REST API fails
-            try:
-                graphql_query = """
-                query CopilotMetrics($org: String!, $startDate: String!, $endDate: String!) {
-                enterprise(slug: $org) {
-                    copilotMetrics(startDate: $startDate, endDate: $endDate) {
-                    acceptedLines
-                    date
-                    }
-                }
-                }
-                """
-                
-                variables = {
-                    "org": organization,
-                    "startDate": start_date,
-                    "endDate": end_date
-                }
-                
-                # GraphQL endpoint is typically at /api/graphql
-                graphql_url = urljoin(self.base_url, "/api/graphql")
-                
-                # Update headers for GraphQL
-                graphql_headers = self.headers.copy()
-                graphql_headers['Content-Type'] = 'application/json'
-                
-                payload = {
-                    "query": graphql_query,
-                    "variables": variables
-                }
-                
-                if self.auth:
-                    response = requests.post(graphql_url, headers=graphql_headers, auth=self.auth, json=payload)
-                else:
-                    response = requests.post(graphql_url, headers=graphql_headers, json=payload)
-                
-                response.raise_for_status()
-                graphql_data = response.json()
-                
-                # Extract data from GraphQL response
-                metrics = graphql_data.get('data', {}).get('enterprise', {}).get('copilotMetrics', [])
-                
-                results = []
-                for metric in metrics:
-                    results.append({
-                        "timestamp": metric.get('date'),
-                        "accepted_lines": metric.get('acceptedLines', 0)
-                    })
-                
-                return results
-            except Exception as graphql_error:
-                print(f"GraphQL fallback also failed: {graphql_error}")
-                return []
+            return 0  # Return 0 if there's an error
             
     def get_copilot_adoption_rate(self, organization, year, month):
         """
