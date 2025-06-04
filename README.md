@@ -127,11 +127,11 @@ You'll know the virtual environment is activated when you see `(venv)` at the be
 The application collects metrics from different data sources using their respective APIs:
 
 ### GitHub Metrics (Enterprise)
-- `a_active_users`: Uses `/orgs/{organization}/members` endpoint
-- `a_ai_adoption_rate`: Uses `/orgs/{organization}/members` and Copilot usage endpoints
-- `a_ai_usage`: Uses `/orgs/{organization}/copilot/chat-stats` endpoint
-- `a_code_suggestions`: Uses `/orgs/{organization}/copilot/usage` with `granularity=day`
-- `a_code_accepted`: Uses same endpoint as code suggestions
+- `a_active_users`: Uses `/enterprises/{organization}/copilot/metrics` endpoint, sums `total_engaged_users` for the month
+- `a_code_suggestions`: Uses `/enterprises/{organization}/copilot/metrics` endpoint, sums `total_code_lines_suggested` for the month
+- `a_code_accepted`: Uses `/enterprises/{organization}/copilot/metrics` endpoint, sums `total_code_lines_accepted` for the month
+- `a_ai_adoption_rate`: Uses `/enterprises/{organization}/copilot/metrics` endpoint, calculates accepted/suggested lines for the month
+- `a_ai_usage`: Uses `/enterprises/{organization}/copilot/metrics` endpoint, sums `total_chats` for the month
 
 ### Bitbucket Metrics
 - `s_merged_prs`: Uses `/rest/api/1.0/projects/{project}/repos/{repo}/pull-requests` with `state=MERGED`
@@ -179,7 +179,7 @@ Sample contents:
 ```
 a_active_users,1000
 a_ai_adoption_rate,0.25
-a_ai_usage,0.15
+a_ai_usage,250
 a_code_suggestions,500
 a_code_accepted,600
 s_merged_prs,300
@@ -214,7 +214,7 @@ Open the ongoing content and add the survey results. They should look like this:
 ```
 a_active_users,1000
 a_ai_adoption_rate,0.25
-a_ai_usage,0.15
+a_ai_usage,250
 a_code_suggestions,500
 a_code_accepted,600
 s_merged_prs,300
@@ -283,4 +283,4 @@ You can customize the dashboard by modifying `config/dashboard.json`:
 - Category weights and order
 - Chart colors
 - Value formatting (percentage/number)
- 
+
