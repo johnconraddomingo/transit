@@ -138,6 +138,10 @@ def main():
     percentage_metrics = ['a_ai_adoption_rate', 'a_ai_usage', 'q_coverage', 
                           'e_user_satisfaction', 'e_adoption', 'e_productivity']
     project_count = len(projects_config['projects'])
+
+    # For averaging PR review time
+    pr_review_time_total = 0
+    pr_review_time_count = 0
     
     # Get organization name from config upfront
     org_name = projects_config['organisation']
@@ -154,7 +158,8 @@ def main():
           # Collect PR review time
         pr_review_time = collector.collect_metric('pr_review_time', project, year, month)
         if pr_review_time is not None:
-            consolidated_results['s_pr_review_time'] += pr_review_time
+            pr_review_time_total += pr_review_time
+            pr_review_time_count += 1
             logger.info(f"✓ PR Review Time: {pr_review_time}")
         else:
             logger.warning(f"⚠ No PR review time data available for {project}")
@@ -253,6 +258,12 @@ def main():
     for metric in percentage_metrics:
         if metric == 'q_coverage':  # This one was collected per project
             consolidated_results[metric] /= project_count
+    
+    # After collecting all project metrics, calculate average PR review time
+    if pr_review_time_count > 0:
+        consolidated_results['s_pr_review_time'] = pr_review_time_total / pr_review_time_count
+    else:
+        consolidated_results['s_pr_review_time'] = 0
     
     # Export consolidated results to CSV
     exporter = CSVExporter()
