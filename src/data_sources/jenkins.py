@@ -61,23 +61,20 @@ class JenkinsDataSource:
         # Calculate start and end dates for the month
         year_int = int(year)
         month_int = int(month)
+         
+        # Format the job path for URL using '/job/' between each part
+        # If the path already has '/job/' segments, use it as is; otherwise split by '/'
+        if '/job/' in deployment_job:
+            encoded_path = deployment_job
+        else:
+            encoded_path = '/job/'.join(deployment_job.split('/'))
        
-        # Get the last day of the month
-        _, last_day = calendar.monthrange(year_int, month_int)
-       
-        # Format dates for the API (Jenkins uses milliseconds since epoch)
-        start_date = int(datetime(year_int, month_int, 1, 0, 0, 0).timestamp() * 1000)
-        end_date = int(datetime(year_int, month_int, last_day, 23, 59, 59).timestamp() * 1000)
-       
-        # Process the deployment_job to handle different formats (simple job or multi-branch)
-        job_parts = deployment_job.split('/')
+        # Ensure it ends with a trailing slash for the API path
+        if not encoded_path.endswith('/'):
+            encoded_path += '/'
        
         # Construct API endpoint for job builds
-        # Handle both simple jobs and jobs in folders/branches
-        api_path = '/job/' + deployment_job + '/api/json'
-        api_endpoint = api_path
-        url = urljoin(self.base_url, api_endpoint)
- 
+        api_url = f"{self.base_url}/job/{encoded_path}api/json"
        
         # Parameters for the API request
         params = {
@@ -85,16 +82,18 @@ class JenkinsDataSource:
         }
        
         try:
-            response = requests.get(url, headers=self.headers, params=params, auth=self.auth)
+            response = requests.get(api_url, headers=self.headers, params=params, auth=self.auth)
             response.raise_for_status()
             data = response.json()
-           
-            # Count successful deployments within the date range
+             
             successful_deployments = 0
             for build in data.get('builds', []):
-                # Check if build timestamp is within our range and was successful
-                if (start_date <= build.get('timestamp', 0) <= end_date and
-                    build.get('result') == 'SUCCESS'):
+                build_timestamp = build.get('timestamp', 0)
+                # Convert to datetime in Australian timezone
+                build_time = datetime.fromtimestamp(build_timestamp / 1000)
+               
+                # Check if the build is in the target month and year, regardless of result
+                if build_time.year == year_int and build_time.month == month_int:
                     successful_deployments += 1
                    
             return successful_deployments
