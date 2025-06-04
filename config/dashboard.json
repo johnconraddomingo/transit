@@ -1,12 +1,6 @@
 {
   "dashboard_title": "GitHub Copilot Metrics Framework",
-  "category_order": [
-    "Adoption",
-    "Speed",
-    "Quality",
-    "Experience",
-    "Delivery"
-  ],
+  "category_order": ["Adoption", "Speed", "Quality", "Experience", "Delivery"],
   "category_weights": {
     "Adoption": 0.0,
     "Speed": 0.38,
@@ -16,100 +10,117 @@
   },
   "chart_colors": {
     "Adoption": "#4285F4",
-    "Speed": "#EA4335",
-    "Quality": "#34A853",
-    "Experience": "#FBBC05",
-    "Delivery": "#8334A4"
+    "Speed": "#4285F4",
+    "Quality": "#4285F4",
+    "Experience": "#4285F4",
+    "Delivery": "#4285F4"
   },
   "metrics_mapping": {
     "a_active_users": {
       "label": "Number of Active Users",
       "category": "Adoption",
-      "format": "number"
+      "format": "number",
+      "weight": 0.25
     },
     "a_ai_adoption_rate": {
       "label": "AI Adoption Rate",
       "category": "Adoption",
-      "format": "percentage"
+      "format": "percentage",
+      "weight": 0.25
     },
     "a_ai_usage": {
       "label": "AI Usage",
       "category": "Adoption",
-      "format": "percentage"
+      "format": "percentage",
+      "weight": 0.25
     },
     "a_code_suggestions": {
       "label": "Code Lines Suggested by Copilot",
       "category": "Adoption",
-      "format": "number"
+      "format": "number",
+      "weight": 0.125
     },
     "a_code_accepted": {
       "label": "Code Lines Accepted from Copilot",
       "category": "Adoption",
-      "format": "number"
+      "format": "number",
+      "weight": 0.125
     },
     "s_merged_prs": {
       "label": "Number of Merged PRs",
       "category": "Speed",
-      "format": "number"
+      "format": "number",
+      "weight": 0.34
     },
     "s_pr_review_time": {
       "label": "Avg PR Review Time (Mins)",
       "category": "Speed",
       "format": "number",
-      "inverse": true
+      "inverse": true,
+      "weight": 0.33
     },
     "s_story_points": {
       "label": "Story Points (Squad Level)",
       "category": "Speed",
-      "format": "number"
+      "format": "number",
+      "weight": 0.33
     },
     "q_code_smells": {
       "label": "Code Quality / Code Smells",
       "category": "Quality",
       "format": "number",
-      "inverse": true
+      "inverse": true,
+      "weight": 0.25
     },
     "q_coverage": {
       "label": "Unit Test Coverage",
       "category": "Quality",
-      "format": "percentage"
+      "format": "percentage",
+      "weight": 0.25
     },
     "q_bugs": {
       "label": "Bugs",
       "category": "Quality",
       "format": "number",
-      "inverse": true
+      "inverse": true,
+      "weight": 0.25
     },
     "q_vulnerabilities": {
       "label": "Vulnerabilities",
       "category": "Quality",
       "format": "number",
-      "inverse": true
+      "inverse": true,
+      "weight": 0.25
     },
     "e_user_satisfaction": {
       "label": "User Satisfaction",
       "category": "Experience",
-      "format": "percentage"
+      "format": "percentage",
+      "weight": 0.25
     },
     "e_adoption": {
       "label": "Adoption & Frequency",
       "category": "Experience",
-      "format": "percentage"
+      "format": "percentage",
+      "weight": 0.25
     },
     "e_productivity": {
       "label": "Productivity, Quality & Benefits Sentiments",
       "category": "Experience",
-      "format": "percentage"
+      "format": "percentage",
+      "weight": 0.25
     },
     "e_use_cases": {
       "label": "Use Cases",
       "category": "Experience",
-      "format": "number"
+      "format": "number",
+      "weight": 0.25
     },
     "d_deployment_frequency": {
       "label": "Deployment Frequency",
       "category": "Delivery",
-      "format": "number"
+      "format": "number",
+      "weight": 1.0
     }
   }
 }
