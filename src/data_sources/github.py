@@ -47,9 +47,6 @@ class GitHubDataSource:
         else:
             raise ValueError("Authentication credentials must be provided. Token authentication is recommended.")
     
-   
-    
- 
     
     def get_active_users(self, organization, year, month):
         """
@@ -61,7 +58,7 @@ class GitHubDataSource:
             month (str): Month (e.g. "05")
             
         Returns:
-            int: Total number of active Copilot users for the month
+            int: Maximum number of active Copilot users for the month
         """
         # Construct API endpoint for Copilot metrics
         api_endpoint = f"/enterprises/{organization}/copilot/metrics"
@@ -87,12 +84,14 @@ class GitHubDataSource:
 
             target_date_prefix = f"{year}-{month:0>2}"  # Ensures month is two digits
 
-            total_active_users = sum(
-                entry.get('total_engaged_users', 0)
-                for entry in entries
-                if entry.get('date', '').startswith(target_date_prefix)
+            # Get the maximum total_engaged_users for the month
+            max_active_users = max(
+                (entry.get('total_engaged_users', 0)
+                 for entry in entries
+                 if entry.get('date', '').startswith(target_date_prefix)),
+                default=0
             )
-            return total_active_users
+            return max_active_users
         except requests.exceptions.RequestException as e:
             print(f"Error fetching GitHub Copilot active users: {e}")
             return 0  # Return 0 if there's an error
