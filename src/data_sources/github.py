@@ -47,9 +47,13 @@ class GitHubDataSource:
         else:
             raise ValueError("Authentication credentials must be provided. Token authentication is recommended.")
     
+   
+    
+ 
+    
     def get_active_users(self, organization, year, month):
         """
-        Get the number of active GitHub Copilot users for a specific organization and month.
+        Get the number of active Copilot users for an organization.
         
         Args:
             organization (str): GitHub organization name
@@ -57,29 +61,14 @@ class GitHubDataSource:
             month (str): Month (e.g. "05")
             
         Returns:
-            int: Number of active GitHub Copilot users for the given organization and month
+            int: Total number of active Copilot users for the month
         """
-        # Calculate start and end dates for the month
-        year_int = int(year)
-        month_int = int(month)
-        
-        # Get the last day of the month
-        _, last_day = calendar.monthrange(year_int, month_int)
-        
-        # Format dates for the API in ISO format
-        start_date = f"{year}-{month}-01T00:00:00Z"
-        end_date = f"{year}-{month}-{last_day}T23:59:59Z"
-        
-        # Construct API endpoint for Copilot users
-        # Using GitHub Enterprise Reports API to get Copilot user data
-        api_endpoint = f"/orgs/{organization}/settings/billing/copilot"
-        
-        # For GitHub.com with GraphQL, we would use a different approach
-        # But we're using the REST API here as an example
+        # Construct API endpoint for Copilot metrics
+        api_endpoint = f"/enterprises/{organization}/copilot/metrics"
         url = urljoin(self.base_url, api_endpoint)
         
         try:
-            # Query the GitHub API for Copilot users
+            # Query the GitHub API for Copilot metrics without any parameters
             if self.auth:
                 response = requests.get(url, headers=self.headers, auth=self.auth)
             else:
@@ -87,36 +76,27 @@ class GitHubDataSource:
                 
             response.raise_for_status()
             data = response.json()
-            
-            # Extract active users count from the response
-            # The actual structure will depend on the GitHub API's response format
-            active_users = data.get('active_users', 0)
-            
-            return active_users
-            
+
+            # Handle if data is a list or dict
+            if isinstance(data, dict):
+                entries = data.get('data', [])
+            elif isinstance(data, list):
+                entries = data
+            else:
+                entries = []
+
+            target_date_prefix = f"{year}-{month:0>2}"  # Ensures month is two digits
+
+            total_active_users = sum(
+                entry.get('total_engaged_users', 0)
+                for entry in entries
+                if entry.get('date', '').startswith(target_date_prefix)
+            )
+            return total_active_users
         except requests.exceptions.RequestException as e:
             print(f"Error fetching GitHub Copilot active users: {e}")
-            
-            # For demonstration, if the enterprise API fails, try a fallback method
-            # This could be a GraphQL query or another endpoint
-            try:
-                # Fallback to a simpler endpoint that might be available
-                fallback_endpoint = f"/orgs/{organization}/copilot/billing"
-                fallback_url = urljoin(self.base_url, fallback_endpoint)
-                
-                if self.auth:
-                    response = requests.get(fallback_url, headers=self.headers, auth=self.auth)
-                else:
-                    response = requests.get(fallback_url, headers=self.headers)
-                    
-                response.raise_for_status()
-                fallback_data = response.json()
-                
-                return fallback_data.get('active_seats', 0)
-            except:
-                # If all methods fail, return 0
-                return 0
-
+            return 0  # Return 0 if there's an error
+        
     def get_copilot_suggested_lines(self, organization, year, month):
         """
         Get the total number of code lines suggested by GitHub Copilot for an organization.
@@ -129,246 +109,187 @@ class GitHubDataSource:
         Returns:
             int: Total number of lines suggested by Copilot for the month
         """
-        # Calculate start and end dates for the month
-        year_int = int(year)
-        month_int = int(month)
-        
-        # Get the last day of the month
-        _, last_day = calendar.monthrange(year_int, month_int)
-        
-        # Format dates for the API in ISO format
-        start_date = f"{year}-{month}-01T00:00:00Z"
-        end_date = f"{year}-{month}-{last_day}T23:59:59Z"
-        
-        # Construct API endpoint for Copilot usage metrics
-        api_endpoint = f"/orgs/{organization}/copilot/usage"
-        
-        params = {
-            "start_date": start_date,
-            "end_date": end_date,
-            "granularity": "month"  # Changed to monthly to get total
-        }
-        
+        # Construct API endpoint for Copilot metrics
+        api_endpoint = f"/enterprises/{organization}/copilot/metrics"
         url = urljoin(self.base_url, api_endpoint)
         
         try:
-            # Query the GitHub API for Copilot metrics
-            if self.auth:
-                response = requests.get(url, headers=self.headers, auth=self.auth, params=params)
-            else:
-                response = requests.get(url, headers=self.headers, params=params)
-                
-            response.raise_for_status()
-            data = response.json()
-            
-            # Get the total suggested lines for the month
-            total_suggested = sum(entry.get('suggested_lines', 0) for entry in data.get('data', []))
-            return total_suggested
-            
-        except requests.exceptions.RequestException as e:
-            print(f"Error fetching GitHub Copilot suggested lines: {e}")
-            return 0  # Return 0 if there's an error
-            
-    def get_copilot_accepted_lines(self, organization, year, month):
-        """
-        Get the total number of code lines accepted from GitHub Copilot suggestions for an organization.
-        
-        Args:
-            organization (str): GitHub organization name
-            year (str): Year (e.g. "2025")
-            month (str): Month (e.g. "05")
-            
-        Returns:
-            int: Total number of lines accepted from Copilot suggestions for the month
-        """
-        # Calculate start and end dates for the month
-        year_int = int(year)
-        month_int = int(month)
-        
-        # Get the last day of the month
-        _, last_day = calendar.monthrange(year_int, month_int)
-        
-        # Format dates for the API in ISO format
-        start_date = f"{year}-{month}-01T00:00:00Z"
-        end_date = f"{year}-{month}-{last_day}T23:59:59Z"
-        
-        # Construct API endpoint for Copilot usage metrics
-        api_endpoint = f"/orgs/{organization}/copilot/usage"
-        
-        params = {
-            "start_date": start_date,
-            "end_date": end_date,
-            "granularity": "month"  # Changed to monthly to get total
-        }
-        
-        url = urljoin(self.base_url, api_endpoint)
-        
-        try:
-            # Query the GitHub API for Copilot metrics
-            if self.auth:
-                response = requests.get(url, headers=self.headers, auth=self.auth, params=params)
-            else:
-                response = requests.get(url, headers=self.headers, params=params)
-                
-            response.raise_for_status()
-            data = response.json()
-            
-            # Get the total accepted lines for the month
-            total_accepted = sum(entry.get('accepted_lines', 0) for entry in data.get('data', []))
-            return total_accepted
-            
-        except requests.exceptions.RequestException as e:
-            print(f"Error fetching GitHub Copilot accepted lines: {e}")
-            return 0  # Return 0 if there's an error
-            
-    def get_copilot_adoption_rate(self, organization, year, month):
-        """
-        Calculate the GitHub Copilot adoption rate for an organization.
-        
-        The adoption rate is calculated as: 
-        - Primary method: Active Copilot users / Total organization users
-        - Secondary method: Accepted lines / Suggested lines (if user counts unavailable)
-        
-        Args:
-            organization (str): GitHub organization name
-            year (str): Year (e.g. "2025")
-            month (str): Month (e.g. "05")
-            
-        Returns:
-            list: A list of dictionaries containing timeseries data of Copilot adoption metrics
-                Format: [{"timestamp": ISO8601 date, "adoption_rate": float, "method": str}]
-        """
-        # Calculate start and end dates for the month
-        year_int = int(year)
-        month_int = int(month)
-        
-        # Get the last day of the month
-        _, last_day = calendar.monthrange(year_int, month_int)
-        
-        # Format dates for the API in ISO format
-        start_date = f"{year}-{month}-01T00:00:00Z"
-        end_date = f"{year}-{month}-{last_day}T23:59:59Z"
-        
-        # Construct API endpoint for organization members count
-        api_endpoint = f"/orgs/{organization}/members"
-        url = urljoin(self.base_url, api_endpoint)
-        
-        try:
-            # First try to calculate adoption rate based on active users vs total users
-            # Get total number of users in the organization
+            # Query the GitHub API for Copilot metrics without any parameters
             if self.auth:
                 response = requests.get(url, headers=self.headers, auth=self.auth)
             else:
                 response = requests.get(url, headers=self.headers)
                 
             response.raise_for_status()
-            org_data = response.json()
-            total_users = org_data.get('total_count', 0)
-            
-            if not total_users:
-                raise ValueError("Could not determine total user count")
-                
-            # Now get active Copilot users using the get_active_users method which already takes year and month
-            active_users = self.get_active_users(organization, year, month)
-            
-            # Calculate adoption rate
-            adoption_rate = active_users / total_users if total_users > 0 else 0
-            
-            # Format as a data point with the last day of the month as timestamp
-            timestamp = f"{year}-{month}-{last_day}T23:59:59Z"
-            results = [{
-                "timestamp": timestamp,
-                "adoption_rate": adoption_rate,
-                "active_users": active_users,
-                "total_users": total_users,
-                "method": "user_count"
-            }]
-            
-            return results
-            
-        except (requests.exceptions.RequestException, ValueError) as e:
-            print(f"Error calculating adoption rate from user counts: {e}")
-            print("Falling back to accepted/suggested lines method")
-            
-            # Fallback method: Calculate adoption as ratio of accepted to suggested lines
-            try:
-                # Get suggested lines using the updated methods that take year and month
-                suggested_lines_data = self.get_copilot_suggested_lines(organization, year, month)
-                
-                # Get accepted lines using the updated method that takes year and month
-                accepted_lines_data = self.get_copilot_accepted_lines(organization, year, month)
-                
-                # Match up the data points by timestamp and calculate rates
-                results = []
-                suggested_dict = {item["timestamp"]: item["suggested_lines"] for item in suggested_lines_data}
-                
-                for accepted_item in accepted_lines_data:
-                    timestamp = accepted_item["timestamp"]
-                    accepted_lines = accepted_item["accepted_lines"]
-                    suggested_lines = suggested_dict.get(timestamp, 0)
-                    
-                    if suggested_lines > 0:
-                        adoption_rate = accepted_lines / suggested_lines
-                        results.append({
-                            "timestamp": timestamp,
-                            "adoption_rate": adoption_rate,
-                            "accepted_lines": accepted_lines,
-                            "suggested_lines": suggested_lines,
-                            "method": "line_ratio"
-                        })
-                
-                return results
-                
-            except Exception as fallback_error:
-                print(f"Fallback method also failed: {fallback_error}")
-                return []
-            
-    def get_ai_usage(self, organization, year, month):
-        """
-        Get AI usage metrics based on the total number of GitHub Copilot Chat interactions.
+            data = response.json()
+            # Handle if data is a list or dict
+            if isinstance(data, dict):
+                entries = data.get('data', [])
+            elif isinstance(data, list):
+                entries = data
+            else:
+                entries = []
+
+            target_date_prefix = f"{year}-{month:0>2}"  # Ensures month is two digits
+
+            total_suggested_lines = 0
+            for entry in entries:
+                if entry.get('date', '').startswith(target_date_prefix):
+                    completions = entry.get('copilot_ide_code_completions', {})
+                    editors = completions.get('editors', [])
+                    for editor in editors:
+                        for model in editor.get('models', []):
+                            for language in model.get('languages', []):
+                                total_suggested_lines += language.get('total_code_lines_suggested', 0)
+            return total_suggested_lines
+        except requests.exceptions.RequestException as e:
+            print(f"Error fetching GitHub Copilot suggested lines: {e}")
+            return 0  # Return 0 if there's an error
         
+    def get_copilot_accepted_lines(self, organization, year, month):
+        """
+        Get the total number of code lines accepted by GitHub Copilot for an organization.
+
         Args:
             organization (str): GitHub organization name
             year (str): Year (e.g. "2025")
             month (str): Month (e.g. "05")
-            
+
         Returns:
-            int: Total number of GitHub Copilot Chat interactions
+            int: Total number of lines accepted by Copilot for the month
         """
-        # Calculate start and end dates for the month
-        year_int = int(year)
-        month_int = int(month)
-        
-        # Get the last day of the month
-        _, last_day = calendar.monthrange(year_int, month_int)
-        
-        # Format dates for the API in ISO format
-        start_date = f"{year}-{month}-01T00:00:00Z"
-        end_date = f"{year}-{month}-{last_day}T23:59:59Z"
-        
-        # Construct API endpoint for Copilot Chat statistics
-        api_endpoint = f"/orgs/{organization}/copilot/chat-stats"
-        
-        params = {
-            "start_date": start_date,
-            "end_date": end_date
-        }
-        
+        api_endpoint = f"/enterprises/{organization}/copilot/metrics"
         url = urljoin(self.base_url, api_endpoint)
-        
+
         try:
-            # Make the API request
             if self.auth:
-                response = requests.get(url, auth=self.auth, headers=self.headers, params=params)
+                response = requests.get(url, headers=self.headers, auth=self.auth)
             else:
-                response = requests.get(url, headers=self.headers, params=params)
-                
+                response = requests.get(url, headers=self.headers)
+
             response.raise_for_status()
             data = response.json()
-            
-            # Extract just the total_chats value from the response
-            return data.get('total_chats', 0)
-            
+            # Handle if data is a list or dict
+            if isinstance(data, dict):
+                entries = data.get('data', [])
+            elif isinstance(data, list):
+                entries = data
+            else:
+                entries = []
+
+            target_date_prefix = f"{year}-{month:0>2}"
+
+            total_accepted_lines = 0
+            for entry in entries:
+                if entry.get('date', '').startswith(target_date_prefix):
+                    completions = entry.get('copilot_ide_code_completions', {})
+                    editors = completions.get('editors', [])
+                    for editor in editors:
+                        for model in editor.get('models', []):
+                            for language in model.get('languages', []):
+                                total_accepted_lines += language.get('total_code_lines_accepted', 0)
+            return total_accepted_lines
         except requests.exceptions.RequestException as e:
-            print(f"Error fetching GitHub Copilot chat statistics: {e}")
+            print(f"Error fetching GitHub Copilot accepted lines: {e}")
             return 0  # Return 0 if there's an error
+        
+    def get_copilot_adoption_rate(self, organization, year, month):
+        """
+        Calculate the GitHub Copilot adoption rate for an organization based on accepted/suggested lines.
+
+        Args:
+            organization (str): GitHub organization name
+            year (str): Year (e.g. "2025")
+            month (str): Month (e.g. "05")
+
+        Returns:
+            float: Copilot adoption rate (accepted lines / suggested lines) for the month
+        """
+        api_endpoint = f"/enterprises/{organization}/copilot/metrics"
+        url = urljoin(self.base_url, api_endpoint)
+
+        try:
+            if self.auth:
+                response = requests.get(url, headers=self.headers, auth=self.auth)
+            else:
+                response = requests.get(url, headers=self.headers)
+
+            response.raise_for_status()
+            data = response.json()
+            # Handle if data is a list or dict
+            if isinstance(data, dict):
+                entries = data.get('data', [])
+            elif isinstance(data, list):
+                entries = data
+            else:
+                entries = []
+
+            target_date_prefix = f"{year}-{month:0>2}"
+
+            total_accepted_lines = 0
+            total_suggested_lines = 0
+            for entry in entries:
+                if entry.get('date', '').startswith(target_date_prefix):
+                    completions = entry.get('copilot_ide_code_completions', {})
+                    editors = completions.get('editors', [])
+                    for editor in editors:
+                        for model in editor.get('models', []):
+                            for language in model.get('languages', []):
+                                total_accepted_lines += language.get('total_code_lines_accepted', 0)
+                                total_suggested_lines += language.get('total_code_lines_suggested', 0)
+            if total_suggested_lines > 0:
+                adoption_rate = total_accepted_lines / total_suggested_lines
+            else:
+                adoption_rate = 0.0
+            return adoption_rate
+        except requests.exceptions.RequestException as e:
+            print(f"Error calculating Copilot adoption rate: {e}")
+            return 0.0
+        
+    def get_ai_usage(self, organization, year, month):
+        """
+        Get the total number of Copilot Chat interactions (total_chats) for an organization.
+
+        Args:
+            organization (str): GitHub organization name
+            year (str): Year (e.g. "2025")
+            month (str): Month (e.g. "05")
+
+        Returns:
+            int: Total number of Copilot Chat interactions for the month
+        """
+        api_endpoint = f"/enterprises/{organization}/copilot/metrics"
+        url = urljoin(self.base_url, api_endpoint)
+
+        try:
+            if self.auth:
+                response = requests.get(url, headers=self.headers, auth=self.auth)
+            else:
+                response = requests.get(url, headers=self.headers)
+
+            response.raise_for_status()
+            data = response.json()
+            # Handle if data is a list or dict
+            if isinstance(data, dict):
+                entries = data.get('data', [])
+            elif isinstance(data, list):
+                entries = data
+            else:
+                entries = []
+
+            target_date_prefix = f"{year}-{month:0>2}"
+
+            total_chats = 0
+            for entry in entries:
+                if entry.get('date', '').startswith(target_date_prefix):
+                    chat = entry.get('copilot_ide_chat', {})
+                    editors = chat.get('editors', [])
+                    for editor in editors:
+                        for model in editor.get('models', []):
+                            total_chats += model.get('total_chats', 0)
+            return total_chats
+        except requests.exceptions.RequestException as e:
+            print(f"Error fetching GitHub Copilot AI usage: {e}")
+            return 0  # Return 0 if there's an error
+
+

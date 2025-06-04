@@ -222,7 +222,7 @@ def main():
     ai_usage = collector.collect_metric('ai_usage', org_name, year, month)
     if ai_usage is not None:
         consolidated_results['a_ai_usage'] = ai_usage
-        logger.info(f"✓ AI Usage: {ai_usage}%")
+        logger.info(f"✓ AI Usage: {ai_usage}")
     else:
         logger.warning("⚠ No AI usage data available")
     
@@ -243,7 +243,7 @@ def main():
     ai_adoption_rate = collector.collect_metric('adoption_rate', org_name, year, month)
     if ai_adoption_rate is not None:
         consolidated_results['a_ai_adoption_rate'] = ai_adoption_rate
-        logger.info(f"✓ AI Adoption Rate: {ai_adoption_rate}%")
+        logger.info(f"✓ AI Adoption Rate: {ai_adoption_rate}")
     else:
         logger.warning("⚠ No AI adoption rate data available")
     
