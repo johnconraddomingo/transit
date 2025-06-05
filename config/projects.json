@@ -1,5 +1,5 @@
 {
-    "organisation": "suncorpgroup",
+    "organisation": "suncorp",
     "projects": [
         "EPI/github-copilot-training",
         "DPI/mac-motor-bicc-ui",
@@ -7,8 +7,10 @@
         "DPI/mcm-bicc-ui",
         "DPI/mcm-bicc-web-experience-api"
     ],
+    "scans": [
+        "mac-motor-bicc-ui"
+    ],
     "deployments": [
-        "EPI/github-copilot-training/main",
-        "EPI/github-copilot-training/deploy-prod"
+        "ENV-Management-jobs-NonProd/job/ENV-Management-jobs-NonProd-UAT/job/UAT-Alerting-UI"
     ]
 }
