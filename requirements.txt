@@ -1,0 +1,5 @@
+# Core dependencies
+jinja2>=3.1.2         # For HTML templating with Jinja2
+pandas>=1.5.3         # For loading and manipulating CSV data
+python-dateutil>=2.8  # For robust datetime parsing if used with pandas 
+

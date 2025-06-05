@@ -207,10 +207,37 @@ body {
 }
 
 .productivity-index {
-    font-size: 20px;
-    font-weight: 700;
-    margin-top: 30px;
+    font-size: 1.6em;
+    font-weight: bold;
+    color: #1a73e8;
+    margin: 20px 0;
     text-align: center;
+    background-color: #f1f8ff;
+    padding: 12px;
+    border-radius: 8px;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
+}
+.productivity-index-banner {
+    background-color: #4E9896;
+    color: #FFCD05;
+    padding: 20px;
+    margin: 40px auto;
+    border-radius: 10px;
+    text-align: center;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    max-width: 500px;
+}
+
+.index-label {
+    font-size: 1.2em;
+    letter-spacing: 0.5px;
+    margin-bottom: 8px;
+    font-weight: 600;
+}
+
+.index-value {
+    font-size: 2.4em;
+    font-weight: bold;
 }
 
 .productivity-note {
