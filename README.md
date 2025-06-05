@@ -37,9 +37,11 @@ You'll know the virtual environment is activated when you see `(venv)` at the be
            "EPI/github-copilot-training",
            "PROJECT2/REPO2"
         ],
+        "scans": [
+            "mac-motor-bicc-ui"
+        ],
         "deployments": [
-           "EPI/github-copilot-training/main",
-           "EPI/github-copilot-training/deploy-prod"
+           "ENV-Management-jobs-NonProd/job/ENV-Management-jobs-NonProd-UAT/job/UAT-Alerting-UI"
         ]
     }
    ```
@@ -144,9 +146,8 @@ The application collects metrics from different data sources using their respect
 - `q_code_smells`: Uses `/api/issues/search` with type=CODE_SMELL
 - `q_bugs`: Uses `/api/issues/search` with type=BUG
 - `q_vulnerabilities`: Uses `/api/issues/search` with type=VULNERABILITY
-
+- `q_coverage`: Uses `/api/measures/component` with metricKeys=coverage,new_coverage
 ### Jenkins Metrics
-- `q_coverage`: Retrieves from build actions, supporting JaCoCo, Cobertura, and generic coverage reports
 - `d_deployment_frequency`: Uses builds API to count successful deployments
 
 ### Experience Metrics
