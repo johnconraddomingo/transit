@@ -11,7 +11,7 @@ across predefined pro    for project in projects_config['projects']:
             consolidated_results['s_merged_prs'] += merged_prs
             logger.info(f"✓ Merged PRs: {merged_prs}")
         else:
-            logger.warning(f"⚠ No merged PR data available for {project}")
+            logger.warning(f"No merged PR data available for {project}")
 """
  
 import argparse
@@ -27,7 +27,10 @@ logging.basicConfig(
     format='%(asctime)s - %(levelname)s - %(message)s',
     datefmt='%Y-%m-%d %H:%M:%S'
 )
-logger = logging.getLogger(__name__)
+ 
+# Import our custom logger
+from src.utils.logger import get_logger
+logger = get_logger(__name__)
  
 # Add the src directory to the path so we can import modules from there
 src_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'src')
@@ -65,6 +68,10 @@ def validate_year_month(year_month):
  
 def main():
     """Main entry point for the application."""
+ 
+ 
+    logger.info (0, "STARTING METRICS COLLECTION...")
+ 
     parser = argparse.ArgumentParser(description='Collect metrics for projects.')
     parser.add_argument('year_month', help='Year and month in format YYYY-MM (e.g. 2025-05)')
     args = parser.parse_args()
@@ -133,13 +140,7 @@ def main():
         'e_productivity': 0,
         'e_use_cases': 0
     }    # Track the number of projects for averaging percentage metrics
-    percentage_metrics = ['a_ai_adoption_rate', 'a_ai_usage',
-                          'e_user_satisfaction', 'e_adoption', 'e_productivity']
-    project_count = len(projects_config['projects'])
-   
-    # Track scan count for averaging code coverage
-    scan_count = len(projects_config.get('scans', []))
-   
+     
     # Counter for projects with valid PR review time data
     pr_review_time_count = 0    
     # Get organization name from config upfront
@@ -150,141 +151,153 @@ def main():
  
     # Extract year and month for later use
     year, month = args.year_month.split('-')
-   
-    for project in projects_config['projects']:
-        logger.info(f"Collecting metrics for project: {project}")
+ 
+    # BitBucket
+    logger.info(0, f"Collecting Metrics from BitBucket")
+    for repo in projects_config['repos']:
+ 
+        logger.info(1, f"Collecting metrics for repository: {repo}")
        
         # Collect merged PRs
-        merged_prs = collector.collect_metric('merged_pr', project, year, month)
+        merged_prs = collector.collect_metric('merged_pr', repo, year, month)
         if merged_prs is not None:
             consolidated_results['s_merged_prs'] += merged_prs
+            logger.info(2, f"✓ Merged PRs: {merged_prs}")
            
         # Collect PR review time - store sum temporarily and track count for averaging later
-        pr_review_time = collector.collect_metric('pr_review_time', project, year, month)
+        pr_review_time = collector.collect_metric('pr_review_time', repo, year, month)
         if pr_review_time is not None and pr_review_time > 0:
             consolidated_results['s_pr_review_time'] += pr_review_time
             pr_review_time_count += 1
-            logger.info(f"✓ PR Review Time: {pr_review_time}")
+            logger.info(2, f"✓ PR Review Time: {pr_review_time}")
         else:
-            logger.warning(f"⚠ No PR review time data available for {project}")
+            logger.warning(2, f"No PR review time data available for {repo}")
  
-        # Collect story points from JIRA        
+ 
+ 
+    # Jira
+    logger.info(0, f"Collecting Metrics from Jira")
+    for project in projects_config['projects']:
+        logger.info(1, f"Collecting story points for project: {project}")
         story_points = collector.collect_metric('story_points', project, year, month)
         if story_points is not None:
             consolidated_results['s_story_points'] += story_points
-            logger.info(f"✓ Story Points: {story_points}")
+            logger.info(2, f"✓ Story Points: {story_points}")
         else:
-            logger.warning(f"⚠ No story points data available from JIRA for {project}")
+            logger.warning(2, f"No story points data available from JIRA for {project}")
        
-        logger.info(f"=== Completed collecting metrics for project: {project} ===\n")
-   
-    # Process SonarQube metrics from scans
-    if 'scans' in projects_config:
-        logger.info("\n=== Collecting SonarQube Metrics ===")
-        for scan in projects_config['scans']:
-            logger.info(f"Collecting SonarQube metrics for scan: {scan}")
-           
-            # Collect bugs from SonarQube
-            bugs = collector.collect_metric('bugs', scan, year, month)
-            if bugs is not None:
-                consolidated_results['q_bugs'] += bugs
-                logger.info(f"✓ SonarQube Bugs: {bugs}")
-            else:
-                logger.warning(f"⚠ No bug data available from SonarQube for {scan}")
-             
-            # Collect code smells from SonarQube
-            code_smells = collector.collect_metric('code_smells', scan, year, month)
-            if code_smells is not None:
-                consolidated_results['q_code_smells'] += code_smells
-                logger.info(f"✓ Code Smells: {code_smells}")
-            else:
-                logger.warning(f"⚠ No code smells data available from SonarQube for {scan}")
  
-            # Collect vulnerabilities from SonarQube
-            vulnerabilities = collector.collect_metric('vulnerabilities', scan, year, month)
-            if vulnerabilities is not None:
-                consolidated_results['q_vulnerabilities'] += vulnerabilities
-                logger.info(f"✓ Vulnerabilities: {vulnerabilities}")
-            else:
-                logger.warning(f"⚠ No vulnerability data available from SonarQube for {scan}")            # Collect code coverage
-            code_coverage = collector.collect_metric('code_coverage', scan, year, month)
-            if code_coverage is not None:
-                consolidated_results['q_coverage'] += code_coverage
-                coverage_scan_count += 1
-                logger.info(f"✓ Code Coverage: {code_coverage}%")
-            else:
-                logger.warning(f"⚠ No code coverage data available from SonarQube for {scan}")
-               
-            logger.info(f"=== Completed collecting SonarQube metrics for scan: {scan} ===\n")
-        logger.info("=== Completed collecting SonarQube metrics ===\n")
-     
-    # Process deployment frequency
-    if 'deployments' in projects_config:
-        logger.info("\n=== Collecting Deployment Metrics ===")
-        for deployment in projects_config['deployments']:
-            deployment_freq = collector.collect_metric('deployment_frequency', deployment, year, month)
-            if deployment_freq is not None:
-                consolidated_results['d_deployment_frequency'] += deployment_freq
-                logger.info(f"✓ Deployment Frequency for {deployment}: {deployment_freq}")
-            else:
-                logger.warning(f"⚠ No deployment frequency data available for {deployment}")
-        logger.info("=== Completed collecting deployment metrics ===\n")    # Collect organization-wide metrics once (for GitHub/Copilot metrics)
-    logger.info(f"\n=== Collecting Organization-wide Metrics for {org_name} ===")
+ 
+    # SonarQube
+    logger.info(0, f"Collecting Metrics from SonarQube")
+    for scan in projects_config['scans']:
+        logger.info(1, f"Collecting SonarQube metrics for scan: {scan}")
+           
+        # Bugs
+        bugs = collector.collect_metric('bugs', scan, year, month)
+        if bugs is not None:
+            consolidated_results['q_bugs'] += bugs
+            logger.info(2, f"✓ SonarQube Bugs: {bugs}")
+        else:
+            logger.warning(2, f"No bug data available from SonarQube for {scan}")
+           
+        # Code Smells
+        code_smells = collector.collect_metric('code_smells', scan, year, month)
+        if code_smells is not None:
+            consolidated_results['q_code_smells'] += code_smells
+            logger.info(2, f"✓ Code Smells: {code_smells}")
+        else:
+            logger.warning(2, f"No code smells data available from SonarQube for {scan}")
+ 
+        # Vulnerabilities
+        vulnerabilities = collector.collect_metric('vulnerabilities', scan, year, month)
+        if vulnerabilities is not None:
+            consolidated_results['q_vulnerabilities'] += vulnerabilities
+            logger.info(2, f"✓ Vulnerabilities: {vulnerabilities}")
+        else:
+            logger.warning(2, f"No vulnerability data available from SonarQube for {scan}")
+           
+        # Code Coverage
+        code_coverage = collector.collect_metric('code_coverage', scan, year, month)
+        if code_coverage is not None:
+            consolidated_results['q_coverage'] += code_coverage
+            coverage_scan_count += 1
+            logger.info(2, f"✓ Code Coverage: {code_coverage}%")
+        else:
+            logger.warning(2, f"No code coverage data available from SonarQube for {scan}")
+           
+ 
+    # Jenkins
+    logger.info(0, f"Collecting Metrics from Jenkins")
+    for deployment in projects_config['deployments']:
+        deployment_freq = collector.collect_metric('deployment_frequency', deployment, year, month)
+        logger.info(1, f"Collecting deployment metrics for deployment: {deployment}")
+        if deployment_freq is not None:
+            consolidated_results['d_deployment_frequency'] += deployment_freq
+            logger.info(2, f"✓ Deployment Frequency for {deployment}: {deployment_freq}")
+        else:
+            logger.warning(2, f"No deployment frequency data available for {deployment}")
+       
    
+    # GitHub
+    logger.info(0, f"Collecting Metrics from GitHub")
+    logger.info(1, f"Collecting GitHub metrics organisation: {org_name}")
     active_users = collector.collect_metric('active_users', org_name, year, month)
     if active_users is not None:
         consolidated_results['a_active_users'] = active_users
-        logger.info(f"✓ Active Users: {active_users}")
+        logger.info(2, f"✓ Active Users: {active_users}")
     else:
-        logger.warning("⚠ No active users data available")
+        logger.warning(2, "No active users data available")
    
     ai_usage = collector.collect_metric('ai_usage', org_name, year, month)
     if ai_usage is not None:
         consolidated_results['a_ai_usage'] = ai_usage
-        logger.info(f"✓ AI Usage: {ai_usage}")
+        logger.info(2, f"✓ AI Usage: {ai_usage}")
     else:
-        logger.warning("⚠ No AI usage data available")
+        logger.warning(2, "No AI usage data available")
    
     code_suggestions = collector.collect_metric('suggested_lines', org_name, year, month)
     if code_suggestions is not None:
         consolidated_results['a_code_suggestions'] = code_suggestions
-        logger.info(f"✓ Code Suggestions: {code_suggestions}")
+        logger.info(2, f"✓ Code Suggestions: {code_suggestions}")
     else:
-        logger.warning("⚠ No code suggestions data available")
+        logger.warning(2, "No code suggestions data available")
    
     code_accepted = collector.collect_metric('accepted_lines', org_name, year, month)
     if code_accepted is not None:
         consolidated_results['a_code_accepted'] = code_accepted
-        logger.info(f"✓ Code Accepted: {code_accepted}")
+        logger.info(2, f"✓ Code Accepted: {code_accepted}")
     else:
-        logger.warning("⚠ No code accepted data available")
+        logger.warning(2, f"No code accepted data available")
    
     ai_adoption_rate = collector.collect_metric('adoption_rate', org_name, year, month)
     if ai_adoption_rate is not None:
         consolidated_results['a_ai_adoption_rate'] = ai_adoption_rate
-        logger.info(f"✓ AI Adoption Rate: {ai_adoption_rate}")
+        logger.info(2, f"✓ AI Adoption Rate: {ai_adoption_rate}")
     else:
-        logger.warning("⚠ No AI adoption rate data available")
+        logger.warning(2, "No AI adoption rate data available")
    
-    logger.info("=== Completed collecting organization-wide metrics ===\n")
    
-    # Calculate average PR review time
+    # Averages
+    logger.info(0, "Calculating Average Metrics")
+   
+    # PR Review Time
     if pr_review_time_count > 0:
         consolidated_results['s_pr_review_time'] = consolidated_results['s_pr_review_time'] / pr_review_time_count
-      # Average the percentage metrics
-    for metric in percentage_metrics:
-        consolidated_results[metric] /= project_count
-      # Average code coverage separately using count of scans with actual coverage data
+ 
+     # Average code coverage separately using count of scans with actual coverage data
     if coverage_scan_count > 0:
         consolidated_results['q_coverage'] /= coverage_scan_count
-        logger.info(f"Average Code Coverage across {coverage_scan_count} scans: {consolidated_results['q_coverage']}%")
-   
+ 
+    # Exporting
+    logger.info(0, "Exporting Results...")
+ 
     # Export consolidated results to CSV
     exporter = CSVExporter()
     output_path = os.path.join(os.path.dirname(__file__), 'ongoing', f"{args.year_month}.csv")
     exporter.export(consolidated_results, output_path)
    
-    logger.info(f"Metrics collection completed. Results exported to {output_path}")
+    logger.info(0, f"Metrics collection completed. Results exported to {output_path}")
  
 if __name__ == "__main__":
     main()

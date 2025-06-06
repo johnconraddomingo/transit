@@ -6,6 +6,7 @@ import requests
 from datetime import datetime, timedelta
 import calendar
 from urllib.parse import urljoin
+from src.utils.logger import get_logger
  
  
 class SonarQubeDataSource:
@@ -24,11 +25,11 @@ class SonarQubeDataSource:
             password (str, optional): Password for basic authentication
        
         Note:
-            Either token OR username/password must be provided for authentication.
-        """
+            Either token OR username/password must be provided for authentication.        """
         self.base_url = base_url.rstrip('/')
         self.token = token
         self.username = username
+        self.logger = get_logger("sonarqube_data_source")
         self.password = password
        
         # Set up authentication headers
@@ -91,7 +92,7 @@ class SonarQubeDataSource:
             return data.get('total', 0)
            
         except requests.exceptions.RequestException as e:
-            print(f"Error fetching {issue_type} from SonarQube: {e}")
+            self.logger.error(3, f"Error fetching {issue_type} from SonarQube: {e}")
             return 0
    
     def get_bugs(self, project_key, year, month):
@@ -149,7 +150,6 @@ class SonarQubeDataSource:
             float: Code coverage percentage reported by SonarQube or 0 if not available
         """
         # Always picking up the latest new coverage, not dependent on month
-
        
         # Construct API endpoint for measures
         api_endpoint = "/api/measures/component"
@@ -174,7 +174,7 @@ class SonarQubeDataSource:
            
             # If new_coverage is not available, we might need to use period parameter
             if not coverage:
-                print(f"New coverage not found in first attempt, trying with period parameter...")
+                self.logger.info(3, f"New coverage not found in first attempt, trying with period parameter...")
                
                 # Try again with the period parameter which is needed for new_* metrics
                 params = f'component={project_key}:&metricKeys=new_coverage&branch=master&period=1'
@@ -191,12 +191,12 @@ class SonarQubeDataSource:
             # If neither new_coverage method worked, fall back to overall coverage
             overall_coverage = next((m.get('value') for m in measures if m.get('metric') == 'coverage'), None)
             if overall_coverage:
-                print(f"Could not find new coverage, falling back to overall coverage: {overall_coverage}")
+                self.logger.info(3, f"Could not find new coverage, falling back to overall coverage: {overall_coverage}")
                 return float(overall_coverage)
             else:
-                print(f"No coverage metrics found for project {project_key}")
+                self.logger.warning(3, f"No coverage metrics found for project {project_key}")
                 return 0
                
         except requests.exceptions.RequestException as e:
-            print(f"Error fetching coverage from SonarQube: {e}")
+            self.logger.error(3, f"Error fetching coverage from SonarQube: {e}")
             return 0

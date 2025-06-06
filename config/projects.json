@@ -1,11 +1,14 @@
 {
     "organisation": "suncorp",
-    "projects": [
+    "repos": [
         "EPI/github-copilot-training",
         "DPI/mac-motor-bicc-ui",
         "DPI/mac-motor-web-experience-api",
         "DPI/mcm-bicc-ui",
         "DPI/mcm-bicc-web-experience-api"
+    ],
+    "projects": [
+        "SNZPA1"
     ],
     "scans": [
         "mac-motor-bicc-ui"
