@@ -148,16 +148,8 @@ class SonarQubeDataSource:
         Returns:
             float: Code coverage percentage reported by SonarQube or 0 if not available
         """
-        # Calculate start and end dates for the month
-        year_int = int(year)
-        month_int = int(month)
-       
-        # Get the last day of the month
-        _, last_day = calendar.monthrange(year_int, month_int)
-       
-        # Format dates for the API
-        from_date = f"{year}-{month}-01T00:00:00+0000"
-        to_date = f"{year}-{month}-{last_day}T23:59:59+0000"
+        # Always picking up the latest new coverage, not dependent on month
+
        
         # Construct API endpoint for measures
         api_endpoint = "/api/measures/component"
