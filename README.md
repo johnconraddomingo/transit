@@ -32,21 +32,28 @@ You'll know the virtual environment is activated when you see `(venv)` at the be
 1. Configure your projects in `config/projects.json`:
    ```json   
    {
-        "organisation": "githuborganisation",
+        "organisation": "suncorp",
+        "repos": [
+            "EPI/github-copilot-training",
+            "DPI/mac-motor-bicc-ui",
+            "DPI/mac-motor-web-experience-api",
+            "DPI/mcm-bicc-ui",
+            "DPI/mcm-bicc-web-experience-api"
+        ],
         "projects": [
-           "EPI/github-copilot-training",
-           "PROJECT2/REPO2"
+            "SNZPA1"
         ],
         "scans": [
             "mac-motor-bicc-ui"
         ],
         "deployments": [
-           "ENV-Management-jobs-NonProd/job/ENV-Management-jobs-NonProd-UAT/job/UAT-Alerting-UI"
+            "ENV-Management-jobs-NonProd/job/ENV-Management-jobs-NonProd-UAT/job/UAT-Alerting-UI"
         ]
     }
-   ```
+    ```
 
 2. Configure your server URLs and data source availability in `config/servers.json`:
+
    ```json
    {       
         "servers": {
@@ -108,10 +115,12 @@ You'll know the virtual environment is activated when you see `(venv)` at the be
        "sonarqube": {
            "username": "YOUR_SONARQUBE_USERNAME",
            "password": "YOUR_SONARQUBE_PASSWORD"
-       },       "jira": {
+       },       
+       "jira": {
            "username": "YOUR_JIRA_USERNAME",
            "password": "YOUR_JIRA_PASSWORD"
-       },       "jenkins": {
+       },       
+       "jenkins": {
            "username": "YOUR_JENKINS_USERNAME",
            "password": "YOUR_JENKINS_PASSWORD"
        },
@@ -195,22 +204,65 @@ d_deployment_frequency,2
 
 ## Adding New Metrics
 
-To add a new metric:
+When you add a new metric to your data collection process, you'll need to register it in the dashboard configuration:
 
-1. Implement the data collection method in the appropriate data source class.
-2. Register the metric in the `MetricsCollector` class by adding an entry to the `metric_mappings` dictionary.
+### 1. Add the metric to the appropriate data source class
 
-## Adding New Data Sources
+Add your data collection method in `src/data_sources/` directory:
+```python
+def collect_new_metric(self, start_date, end_date):
+    # Implementation of data collection logic
+    return value
+```
 
-To add a new data source:
+### 2. Register the metric in the MetricsCollector
 
-1. Create a new class in the `src/data_sources` directory.
-2. Implement the necessary methods to collect metrics.
-3. Register the data source with the `MetricsCollector` instance in `collect_metrics.py`.
+In `src/metrics/collector.py`, add your metric to the `metric_mappings` dictionary:
+```python
+self.metric_mappings = {
+    # ... existing mappings
+    'new_metric_key': {
+        'method': self.data_source.collect_new_metric,
+        'args': []
+    }
+}
+```
+
+### 3. Add the metric to the dashboard configuration
+
+In `config/dashboard.json`, add an entry in the `metrics_mapping` object:
+```json
+"metrics_mapping": {
+  // ... existing metrics
+  "new_metric_key": {
+    "label": "Human-Readable Metric Name",
+    "category": "Quality", // Choose an appropriate category
+    "format": "number", // or "percentage"
+    "inverse": false, // true if lower values are better
+    "weight": 0.2 // Set appropriate weight within its category
+  }
+}
+```
+
+Remember to adjust the weights of other metrics in the same category to ensure they still sum to 1.0.
+
+### 4. Verify data collection and visualization
+
+1. Run the data collection for a test month:
+   ```powershell
+   python collect_metrics.py 2025-10
+   ```
+
+2. Generate the updated dashboard:
+   ```powershell
+   python visualise.py
+   ```
+
+3. Check that your new metric appears in the dashboard with correct formatting and categorization.
 
 ## Experiences
-Experiences is added manually and picked up from the survey results
-Open the ongoing content and add the survey results. They should look like this:
+
+Experiences metrics are added manually and picked up from the survey results. Open the ongoing content CSV files and add the survey results. They should look like this:
 
 ```
 a_active_users,1000
@@ -226,12 +278,13 @@ q_coverage,0.30
 q_bugs,480
 q_vulnerabilities,92  
 e_user_satisfaction,0.60
-e_adoption,.22
+e_adoption,0.22
 e_productivity,0.55
 e_use_cases,8
 d_deployment_frequency,2
 ```
-The order does not matter
+
+The order of metrics in the CSV file does not matter. The visualization tool will properly organize them according to your dashboard configuration.
 
 ## Visualization
 
@@ -252,30 +305,77 @@ You can also specify custom paths:
 python visualise.py [baseline_dir] [ongoing_dir] [output_dir]
 ```
 
+For example:
+```powershell
+python visualise.py baseline data/ongoing custom/reports
+```
+
+This allows you to:
+- Maintain multiple baseline datasets for different teams or projects
+- Separate ongoing metrics by team or project
+- Generate dashboards in custom locations for different stakeholders
+
 ### Dashboard Features
 
-The dashboard includes:
-- Metrics organized by categories (Adoption, Speed, Quality, Experience, Delivery)
-- Historical trends with interactive line charts
-- Comparison between current values and baseline
-- New averages across time periods
-- Productivity improvement calculations
-- Weighted productivity index
+The generated HTML dashboard includes:
+
+- **Organized Metric Categories**: Metrics grouped into sections (Adoption, Speed, Quality, Experience, Delivery)
+  - Each category is collapsible for better information management
+  - Visual color coding to distinguish between categories
+
+- **Comprehensive Metric Cards**: Each metric displayed with:
+  - Current value
+  - Baseline value
+  - New average across all time periods
+  - Percentage improvement with visual indicators
+    - Green for significant improvements
+    - Yellow for modest improvements
+    - Red for declining metrics
+  - Historical data in collapsible tables
+  - Interactive line charts showing trends over time
+
+- **Productivity Analysis**:
+  - Overall productivity index prominently displayed
+  - Detailed table showing how each metric contributes to the index
+  - Weighted calculations based on the configured category and metric weights
+
+- **Visual Comparisons**:
+  - Baseline reference lines on all charts for easy comparison
+  - Consistent formatting based on metric type (percentage vs. number)
+  - Clear trend indicators showing direction and magnitude of change
 
 ### Productivity Index Calculation
 
-The productivity index is calculated using weighted contributions from each metric:
-1. Individual metric improvement = ((Current - Baseline) / |Baseline|) * 100%
-2. For inverse metrics (where lower is better), the improvement is negated
-3. Each metric's contribution = Improvement * Category Weight
-4. Overall index = Sum of all metric contributions
+The productivity index is calculated using weighted contributions from each metric based on the configuration in `config/dashboard.json`:
 
-Category weights are configured in `config/dashboard.json`:
+1. **Individual metric improvement calculation**:
+   ```
+   Improvement = ((Current - Baseline) / |Baseline|) * 100%
+   ```
+   - For inverse metrics (where lower is better, marked with `"inverse": true`), the improvement is negated
+   - Example: If code smells dropped from 3,500 to 3,000, the improvement is 14.3%
+
+2. **Weighted metric contribution**:
+   ```
+   Contribution = Improvement * Metric.Weight * Category.Weight
+   ```
+   - Each metric has its own weight within its category
+   - Each category has a weight in the overall index
+   - Example: Code smells (14.3% improvement, 0.25 metric weight, 0.4 category weight) = 1.43% contribution
+
+3. **Overall productivity index**:
+   ```
+   ProductivityIndex = Sum of all metric contributions
+   ```
+
+The default category weights are configured as:
 - Speed: 38%
 - Quality: 40%
 - Experience: 12%
 - Delivery: 10%
 - Adoption: 0% (tracked but not weighted in the index)
+
+This weighting system ensures that improvements in the most critical areas (like code quality and development speed) contribute more significantly to the overall productivity index.
 
 ### Customization
 
@@ -284,4 +384,98 @@ You can customize the dashboard by modifying `config/dashboard.json`:
 - Category weights and order
 - Chart colors
 - Value formatting (percentage/number)
+
+Example dashboard configuration:
+```json
+{
+  "dashboard_title": "GitHub Copilot Metrics Framework",
+  "category_order": ["Adoption", "Speed", "Quality", "Experience", "Delivery"],
+  "category_weights": {
+    "Adoption": 0.0,
+    "Speed": 0.38,
+    "Quality": 0.4,
+    "Experience": 0.12,
+    "Delivery": 0.1
+  },
+  "chart_colors": {
+    "Adoption": "#4285F4",
+    "Speed": "#4285F4",
+    "Quality": "#4285F4",
+    "Experience": "#4285F4",
+    "Delivery": "#4285F4"
+  },
+  "metrics_mapping": {
+    "a_active_users": {
+      "label": "Number of Active Users",
+      "category": "Adoption",
+      "format": "number",
+      "weight": 0.25
+    },
+    "a_ai_adoption_rate": {
+      "label": "AI Adoption Rate",
+      "category": "Adoption",
+      "format": "percentage",
+      "weight": 0.25
+    }
+    // Other metrics defined similarly
+  }
+}
+```
+
+Each section of the configuration serves a specific purpose:
+
+- `dashboard_title`: Sets the title displayed at the top of the dashboard
+- `category_order`: Controls the sequence in which metric categories appear in the dashboard
+- `category_weights`: Determines the contribution of each category to the overall productivity index
+  - Values should sum to 1.0 (or 0 if the category shouldn't impact the index)
+  - Higher weights give more importance to that category
+- `chart_colors`: Defines the color scheme for charts in each category
+  - Uses hex color codes (e.g., "#4285F4" for blue)
+  - Consistent colors help with visual identification
+- `metrics_mapping`: Configures individual metrics with the following properties:
+  - `label`: Human-readable name displayed in the dashboard
+  - `category`: Associates the metric with a category from `category_order`
+  - `format`: Presentation format ("number" or "percentage")
+  - `inverse`: Optional boolean, set to `true` if lower values are better (like bugs or code smells)
+  - `weight`: Relative importance within its category (weights in each category should sum to 1.0)
+
+#### Customizing for Different Reporting Needs
+
+You can modify the dashboard configuration to highlight different aspects of your GitHub Copilot metrics:
+
+1. **To emphasize developer experience**: Increase the weight of the "Experience" category
+   ```json
+   "category_weights": {
+     "Adoption": 0.0,
+     "Speed": 0.3,
+     "Quality": 0.3,
+     "Experience": 0.3,
+     "Delivery": 0.1
+   }
+   ```
+
+2. **To track adoption metrics without affecting productivity index**: Keep "Adoption" weight at 0.0
+   - Adoption metrics will still be displayed but won't affect the productivity index calculation
+
+3. **To add new metrics**: Add new entries to the `metrics_mapping` object
+   ```json
+   "new_metric_key": {
+     "label": "New Metric Display Name",
+     "category": "Quality",
+     "format": "number",
+     "weight": 0.2
+   }
+   ```
+   (Remember to adjust other weights in the same category to maintain a sum of 1.0)
+
+4. **To change visualization colors**: Modify the `chart_colors` object
+   ```json
+   "chart_colors": {
+     "Adoption": "#4285F4",  // Blue
+     "Speed": "#34A853",     // Green
+     "Quality": "#FBBC05",   // Yellow
+     "Experience": "#EA4335", // Red
+     "Delivery": "#673AB7"   // Purple
+   }
+   ```
 
