@@ -79,10 +79,14 @@ def prepare_dashboard_context(config, baseline_data, time_series_data, average_d
             # Chart options including baseline reference
             chart_options = {
                 "lineColor": category_color,
-                "isPercentage": fmt == "percentage",
                 "weight_pct": weight_pct,
                 "baselineColor": "#CCCCCC"
             }
+            if fmt == "percentage":
+                chart_options["isPercentage"] = True
+            else:
+                chart_options["isInteger"] = True
+                chart_options["decimals"] = 0
             if baseline_val is not None:
                 chart_options["baselineValue"] = baseline_val
 
