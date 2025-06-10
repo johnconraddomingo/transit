@@ -1,6 +1,12 @@
 {
   "dashboard_title": "GitHub Copilot Metrics Framework",
-  "category_order": ["Adoption", "Speed", "Quality", "Experience", "Delivery"],
+  "category_order": [
+    "Adoption",
+    "Speed",
+    "Quality",
+    "Experience",
+    "Delivery"
+  ],
   "category_weights": {
     "Adoption": 0.0,
     "Speed": 0.38,
@@ -31,7 +37,7 @@
     "a_ai_usage": {
       "label": "AI Usage",
       "category": "Adoption",
-      "format": "percentage",
+      "format": "number",
       "weight": 0.25
     },
     "a_code_suggestions": {
