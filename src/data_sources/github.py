@@ -193,24 +193,24 @@ class GitHubDataSource:
     def get_copilot_adoption_rate(self, organization, year, month):
         """
         Calculate the GitHub Copilot adoption rate for an organization based on accepted/suggested lines.
- 
+
         Args:
             organization (str): GitHub organization name
             year (str): Year (e.g. "2025")
             month (str): Month (e.g. "05")
- 
+
         Returns:
-            float: Copilot adoption rate (accepted lines / suggested lines) for the month
+            float: Copilot adoption rate (accepted lines / suggested lines) for the month, rounded to 4 decimal places
         """
         api_endpoint = f"/enterprises/{organization}/copilot/metrics"
         url = urljoin(self.base_url, api_endpoint)
- 
+
         try:
             if self.auth:
                 response = requests.get(url, headers=self.headers, auth=self.auth)
             else:
                 response = requests.get(url, headers=self.headers)
- 
+
             response.raise_for_status()
             data = response.json()
             # Handle if data is a list or dict
@@ -220,9 +220,9 @@ class GitHubDataSource:
                 entries = data
             else:
                 entries = []
- 
+
             target_date_prefix = f"{year}-{month:0>2}"
- 
+
             total_accepted_lines = 0
             total_suggested_lines = 0
             for entry in entries:
@@ -238,7 +238,7 @@ class GitHubDataSource:
                 adoption_rate = total_accepted_lines / total_suggested_lines
             else:
                 adoption_rate = 0.0
-            return adoption_rate
+            return round(adoption_rate, 4)
         except requests.exceptions.RequestException as e:
             self.logger.error(3, f"Error calculating Copilot adoption rate: {e}")
             return 0.0
