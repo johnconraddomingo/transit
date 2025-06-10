@@ -1,6 +1,9 @@
 """
 Metrics collector module that orchestrates data collection from various sources.
 """
+ # Import our custom logger
+from src.utils.logger import get_logger
+logger = get_logger(__name__)
  
 class MetricsCollector:
     """
@@ -25,6 +28,7 @@ class MetricsCollector:
             'vulnerabilities': ('sonarqube', 'get_vulnerabilities'),
             'deployment_frequency': ('jenkins', 'get_deployment_frequency'),
         }
+        self.logger = logger
    
     def register_data_source(self, name, data_source):
         """
@@ -34,8 +38,7 @@ class MetricsCollector:
             name (str): Name of the data source
             data_source (object): Data source object
         """
-        self.data_sources[name] = data_source
-   
+        self.data_sources[name] = data_source  
     def collect_metric(self, metric_type, project, year, month):
         """
         Collect a specific metric for a given project and time period.
@@ -48,15 +51,15 @@ class MetricsCollector:
            
         Returns:
             The metric value or None if the metric cannot be collected
-        """
+        """        
         if metric_type not in self.metric_mappings:
-            print(f"Warning: Unknown metric type '{metric_type}'")
+            self.logger.warning(2, f"Unknown metric type '{metric_type}'")
             return None
            
         source_name, method_name = self.metric_mappings[metric_type]
        
         if source_name not in self.data_sources:
-            print(f"Warning: Data source '{source_name}' not registered")
+            self.logger.warning(2, f"Data source '{source_name}' not registered")
             return None
            
         data_source = self.data_sources[source_name]
@@ -65,7 +68,7 @@ class MetricsCollector:
         try:
             return method(project, year, month)
         except Exception as e:
-            print(f"Error collecting metric '{metric_type}' for project '{project}': {e}")
+            self.logger.error(2, f"Error collecting metric '{metric_type}' for project '{project}': {e}")
             return None
    
     def register_metric(self, metric_type, source_name, method_name):

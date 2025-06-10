@@ -11,7 +11,7 @@ class CSVExporter:
     Exports metrics data to CSV files.
     """ 
 
-    def export_consolidated(self, consolidated_data, output_path):
+    def export(self, consolidated_data, output_path):
         """
         Export consolidated metrics to a CSV file with one metric per row.
         

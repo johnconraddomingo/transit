@@ -7,6 +7,7 @@ from datetime import datetime
 import calendar
 from urllib.parse import urljoin
 import json
+from src.utils.logger import get_logger
  
  
 class JenkinsDataSource:
@@ -25,10 +26,10 @@ class JenkinsDataSource:
             password (str, optional): Password for basic authentication
        
         Note:
-            Either token OR username/password must be provided for authentication.
-        """
+            Either token OR username/password must be provided for authentication.        """
         self.base_url = base_url.rstrip('/')
         self.token = token
+        self.logger = get_logger("jenkins_data_source")
         self.username = username
         self.password = password
        
@@ -97,9 +98,8 @@ class JenkinsDataSource:
                     successful_deployments += 1
                    
             return successful_deployments
-           
         except requests.exceptions.RequestException as e:
-            print(f"Error fetching deployment data from Jenkins: {e}")
+            self.logger.error(3, f"Error fetching deployment data from Jenkins: {e}")
             return 0
  
     def get_code_coverage(self, project, year, month):
@@ -182,9 +182,8 @@ class JenkinsDataSource:
                 # Calculate the average coverage
                 return round(sum(coverage_values) / len(coverage_values), 2)
             else:
-                print(f"No coverage data found for project {project} in {year}-{month}")
+                self.logger.info(3, f"No coverage data found for project {project} in {year}-{month}")
                 return None
-               
         except requests.exceptions.RequestException as e:
-            print(f"Error fetching code coverage data from Jenkins: {e}")
+            self.logger.error(3, f"Error fetching code coverage data from Jenkins: {e}")
             return None

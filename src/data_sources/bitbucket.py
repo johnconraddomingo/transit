@@ -6,13 +6,13 @@ import requests
 from datetime import datetime
 import calendar
 from urllib.parse import urljoin
+from src.utils.logger import get_logger
  
  
 class BitbucketDataSource:
     """
     Data source for connecting to a Bitbucket server and retrieving metrics.
     """
-   
     def __init__(self, base_url, token=None, username=None, password=None):
         """
         Initialize the BitbucketDataSource.
@@ -30,6 +30,7 @@ class BitbucketDataSource:
         self.token = token
         self.username = username
         self.password = password
+        self.logger = get_logger("bitbucket_data_source")
        
         # Set up authentication headers
         self.headers = {
@@ -96,18 +97,20 @@ class BitbucketDataSource:
             # Convert to milliseconds timestamp (same format as Bitbucket API)
             start_timestamp = int(start_dt.timestamp() * 1000)
             end_timestamp = int(end_dt.timestamp() * 1000)
-           
-            # Filter PRs by closedDate that fall within our date range
+             # Filter PRs by closedDate that fall within our date range
             filtered_prs = [
                 pr for pr in data.get('values', [])
                 if pr.get('closedDate') and start_timestamp <= pr.get('closedDate') <= end_timestamp
             ]
            
-            # Return the count of PRs that were closed within the date range
-            return len(filtered_prs)
+            pr_count = len(filtered_prs)
+            self.logger.info(3, f"Found {pr_count} merged PRs in {project_path} for {year}-{month}")
            
+            # Return the count of PRs that were closed within the date range
+            return pr_count
+       
         except requests.exceptions.RequestException as e:
-            print(f"Error fetching merged PRs from Bitbucket: {e}")
+            self.logger.error(3, f"Error fetching merged PRs from Bitbucket: {e}")
             return 0
    
     def get_pr_review_time(self, project_path, year, month):
@@ -120,7 +123,7 @@ class BitbucketDataSource:
             month (str): Month (e.g. "05")
            
         Returns:
-            float: Average PR review time in hours or 0 if no PRs
+            float: Average PR review time in hours (rounded to 2 decimal places) or 0 if no PRs
         """
         # Split project path into project and repo parts
         project, repo = project_path.split('/')
@@ -162,11 +165,11 @@ class BitbucketDataSource:
                
             response.raise_for_status()
             data = response.json()
-           
-            # Get PR details for calculating review time
+             # Get PR details for calculating review time
             prs = data.get('values', [])
            
             if not prs:
+                self.logger.info(3, f"No PRs found for {project_path} in {year}-{month}")
                 return 0  # Return 0 if no PRs found
            
             total_review_time = 0
@@ -205,24 +208,26 @@ class BitbucketDataSource:
                         # Convert timestamps to datetime objects (timestamps are in milliseconds)
                         created_datetime = datetime.fromtimestamp(created_date / 1000)
                         approval_datetime = datetime.fromtimestamp(approval_date / 1000)
-                       
-                        # Calculate review time in hours
+                         # Calculate review time in hours
                         review_time = (approval_datetime - created_datetime).total_seconds() / 3600
                        
                         total_review_time += review_time
                         pr_count += 1
-               
+                        self.logger.info(4, f"PR #{pr_id} review time: {review_time:.2f} hours")
                 except requests.exceptions.RequestException as e:
-                    print(f"Error fetching activities for PR {pr_id}: {e}")
+                    self.logger.error(3, f"Error fetching activities for PR {pr_id}: {e}")
                     continue
-           
-            # Calculate the average review time
+             # Calculate the average review time
             if pr_count > 0:
-                return total_review_time / pr_count
+                avg_review_time = total_review_time / pr_count
+                avg_review_time_rounded = round(avg_review_time, 2)
+                self.logger.info(3, f"Average PR review time for {project_path}: {avg_review_time_rounded:.2f} hours")
+                return avg_review_time_rounded
             else:
+                self.logger.info(3, f"No PRs with approval found for {project_path} in {year}-{month}")
                 return 0
-               
+       
         except requests.exceptions.RequestException as e:
-            print(f"Error fetching PR review time from Bitbucket: {e}")
+            self.logger.error(3, f"Error fetching PR review time from Bitbucket: {e}")
             return 0
  
