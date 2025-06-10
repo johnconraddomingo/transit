@@ -123,7 +123,7 @@ class BitbucketDataSource:
             month (str): Month (e.g. "05")
            
         Returns:
-            float: Average PR review time in hours or 0 if no PRs
+            float: Average PR review time in hours (rounded to 2 decimal places) or 0 if no PRs
         """
         # Split project path into project and repo parts
         project, repo = project_path.split('/')
@@ -220,8 +220,9 @@ class BitbucketDataSource:
              # Calculate the average review time
             if pr_count > 0:
                 avg_review_time = total_review_time / pr_count
-                self.logger.info(3, f"Average PR review time for {project_path}: {avg_review_time:.2f} hours")
-                return avg_review_time
+                avg_review_time_rounded = round(avg_review_time, 2)
+                self.logger.info(3, f"Average PR review time for {project_path}: {avg_review_time_rounded:.2f} hours")
+                return avg_review_time_rounded
             else:
                 self.logger.info(3, f"No PRs with approval found for {project_path} in {year}-{month}")
                 return 0
