@@ -183,16 +183,15 @@ class SonarQubeDataSource:
                 response.raise_for_status()
                 data = response.json()
                 measures = data.get('component', {}).get('measures', [])
-                coverage = next((m.get('periods', [{}])[0].get('value') for m in measures if m.get('metric') == 'new_coverage'), None)
-              # If new_coverage is available, return it
+                coverage = next((m.get('periods', [{}])[0].get('value') for m in measures if m.get('metric') == 'new_coverage'), None)              # If new_coverage is available, return it
             if coverage:
-                return float(coverage)
+                return float(coverage) / 100.0  # Convert from percentage to decimal
            
             # If neither new_coverage method worked, fall back to overall coverage
             overall_coverage = next((m.get('value') for m in measures if m.get('metric') == 'coverage'), None)
             if overall_coverage:
                 self.logger.info(3, f"Could not find new coverage, falling back to overall coverage: {overall_coverage}")
-                return float(overall_coverage)
+                return float(overall_coverage) / 100.0  # Convert from percentage to decimal
             else:
                 self.logger.warning(3, f"No coverage metrics found for project {project_key}")
                 return 0
