@@ -529,13 +529,16 @@ function initCharts() {
                 } catch (parseError) {
                     console.error('Error parsing chart data/options:', parseError);
                     return; // Skip this chart
-                }
-
-                // Check if this is Deployment Frequency in executive summary
+                }                // Check if this is Deployment Frequency in executive summary
                 const metricKey = chart.getAttribute('data-metric-key');
                 console.log('Chart metric key:', metricKey, 'Chart ID:', chart.id);
 
-                if (metricKey === 'd_deployment_frequency' && chart.id.includes('executive_')) {
+                // Use either ID-based or data-metric-key based detection
+                const isDeploymentFrequencyExecutive =
+                    (chart.id.includes('executive_') && chart.id.includes('deployment_frequency')) ||
+                    (metricKey === 'd_deployment_frequency' && chart.id.includes('executive_'));
+
+                if (isDeploymentFrequencyExecutive) {
                     console.log("Found deployment frequency chart in executive summary:", chart.id);
 
                     try {
