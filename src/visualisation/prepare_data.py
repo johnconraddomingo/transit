@@ -99,9 +99,7 @@ def prepare_dashboard_context(config, baseline_data, time_series_data, average_d
                     "arrow": arrow,
                     "description": better,
                     "color": get_trend_color(pct, is_inverse)
-                }
-
-            # Combine metric data
+                }            # Combine metric data
             metrics.append({
                 "key": metric_key,
                 "label": label,
@@ -117,11 +115,15 @@ def prepare_dashboard_context(config, baseline_data, time_series_data, average_d
                 "global_weight": global_weight
             })
 
-        categories.append({
-            "name": category_name,
-            "color": category_color,
-            "metrics": metrics
-        })    # Executive summary metrics (e.g., Story Points, AI Adoption Rate, Deployment Frequency)
+        # Add category after processing all its metrics
+        if metrics:
+            categories.append({
+                "name": category_name,
+                "color": category_color,
+                "metrics": metrics
+            })
+
+    # Executive summary metrics (e.g., Story Points, AI Adoption Rate, Deployment Frequency)
     executive_summary_metrics = []
     # Add Story Points, AI Adoption Rate, and Deployment Frequency if present
     for category in categories:
@@ -129,11 +131,35 @@ def prepare_dashboard_context(config, baseline_data, time_series_data, average_d
             if metric["key"] in ["s_story_points", "a_ai_adoption_rate", "d_deployment_frequency"]:
                 executive_summary_metrics.append(metric)
 
+    # Prepare active users data for donut chart
+    active_users_metric = next((metric for cat in categories for metric in cat["metrics"] if metric["key"] == "a_active_users"), None)
+    active_users_total = 5000  # From all.csv
+    if active_users_metric:
+        current_value = int(active_users_metric["current"].replace(",", "")) if active_users_metric["current"] != "N/A" else 0
+        active_users_data = {
+            "current": current_value,
+            "total": active_users_total,
+            "trend": active_users_metric["trend"],
+            "chart_data": [
+                {"label": "Active Users", "value": current_value},
+                {"label": "Remaining", "value": max(0, active_users_total - current_value)}
+            ],
+            "chart_options": {
+                "type": "donut",
+                "colors": ["#4285F4", "#E8EAED"],
+                "isInteger": True,
+                "decimals": 0
+            }
+        }
+    else:
+        active_users_data = None
+
     return {
         "dashboard_title": config.get("dashboard_title", "Dashboard"),
         "logo_base64": logo_base64,
         "subtitle": subtitle,
         "categories": categories,
         "overall_index": productivity_data.get("overall_index", 0),
-        "executive_summary_metrics": executive_summary_metrics
+        "executive_summary_metrics": executive_summary_metrics,
+        "active_users": active_users_data
     }

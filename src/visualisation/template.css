@@ -408,3 +408,41 @@ body {
     width: 100%;
     text-align: center;
 }
+
+.executive-summary-metric.active-users-widget {
+    flex: 1 1 calc(33.333% - 20px);
+    min-width: 280px;
+    text-align: center;
+    background-color: #EA4335;
+    color: white;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding: 24px 16px;
+}
+
+.executive-summary-metric.active-users-widget .metric-title {
+    color: #FFCD05;
+    font-size: 1.2em;
+    margin-bottom: 16px;
+    width: 100%;
+    text-align: center;
+}
+
+.executive-summary-metric.active-users-widget .metric-value {
+    color: white;
+    font-size: 2.8em;
+    font-weight: bold;
+    line-height: 1.2;
+    width: 100%;
+    text-align: center;
+    margin-bottom: 16px;
+}
+
+.executive-summary-metric .donut-chart-container {
+    margin-top: 10px;
+    margin-bottom: 10px;
+    height: 180px;
+    width: 180px;
+}

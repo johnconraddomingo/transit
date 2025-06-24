@@ -39,9 +39,14 @@
                 document.body.appendChild(scriptElement);
             } catch (e) {
                 console.error('Error loading JavaScript:', e);
-            }
+            } function initializeCharts() {
+                // If we have a custom initialization function from charts/index.js, use it
+                if (typeof window.initCharts === 'function') {
+                    window.initCharts();
+                    return;
+                }
 
-            function initializeCharts() {
+                // Fallback initialization if custom function is not available
                 const chartCanvases = document.querySelectorAll('.chart-canvas');
                 chartCanvases.forEach(function (canvas) {
                     try {

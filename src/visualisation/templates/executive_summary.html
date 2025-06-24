@@ -3,6 +3,19 @@
         <div class="metric-title">Overall Productivity Index</div>
         <div class="metric-value index-value">{{ overall_index }}%</div>
     </div>
+    <div class="executive-summary-metric active-users-widget">
+        <div class="metric-title">Number of Active Users</div>
+        <div class="metric-value">{{ active_users.current }} / {{ active_users.total }}</div>
+        {% if active_users.trend %}
+        <div class="metric-trend" style="background-color: {{ active_users.trend.color }};">
+            {{ active_users.trend.pct }} {{ active_users.trend.arrow }} ({{ active_users.trend.description }})
+        </div>
+        {% endif %}
+        <div class="donut-chart-container">
+            <canvas id="active_users_donut" class="chart-canvas" data-chart='{{ active_users.chart_data | tojson }}'
+                data-options='{{ active_users.chart_options | tojson }}' data-type="donut"></canvas>
+        </div>
+    </div>
     {% for metric in executive_summary_metrics %}
     <div class="executive-summary-metric">
         <div class="metric-title">{{ metric.label }}</div>
