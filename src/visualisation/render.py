@@ -37,6 +37,7 @@ def generate_dashboard(baseline_dir="baseline", ongoing_dir="ongoing", output_di
             os.path.join("src", "visualisation", "charts", "tooltips.js"),
             os.path.join("src", "visualisation", "charts", "lineChart.js"),
             os.path.join("src", "visualisation", "charts", "barChart.js"),
+            os.path.join("src", "visualisation", "charts", "donutChart.js"),
             os.path.join("src", "visualisation", "charts", "index.js"),
         ]
 

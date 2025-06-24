@@ -2,13 +2,21 @@
 // Note: All functions are exposed directly to window
 
 // Load utilities first
-document.write('<script src="./charts/axisUtils.js"></script>');
-document.write('<script src="./charts/tooltips.js"></script>');
+function loadScript(src) {
+    const script = document.createElement('script');
+    script.src = src;
+    script.async = false;
+    document.head.appendChild(script);
+}
+
+loadScript('./charts/axisUtils.js');
+loadScript('./charts/tooltips.js');
 
 // Load chart implementations
-document.write('<script src="./charts/lineChart.js"></script>');
-document.write('<script src="./charts/barChart.js"></script>');
+loadScript('./charts/lineChart.js');
+loadScript('./charts/barChart.js');
+loadScript('./charts/donutChart.js');
 
 // Load chart initialization
-document.write('<script src="./charts/index.js"></script>');
+loadScript('./charts/index.js');
 
