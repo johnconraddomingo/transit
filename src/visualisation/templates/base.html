@@ -6,47 +6,68 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <!-- Load CSS and JS using a robust method -->
+    <!-- Load Chart.js from CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+
+<body>
+    <!-- Add CSS and JS after DOM load -->
     <script type="text/javascript">
+        // Wait for Chart.js and DOM to be ready
         document.addEventListener('DOMContentLoaded', function () {
             // Add CSS
             const styleElement = document.createElement('style');
             styleElement.textContent = `{{ embedded_css | safe }}`;
             document.head.appendChild(styleElement);
 
-            // Execute JavaScript
-            const jsCode = `{{ embedded_js | safe }}`;
-            const scriptElement = document.createElement('script');
-            scriptElement.text = jsCode;
-            document.body.appendChild(scriptElement);
+            // Execute custom JavaScript
+            try {
+                const jsCode = `{{ embedded_js | safe }}`;
+                if (!jsCode.trim()) {
+                    console.error('No JavaScript code found');
+                    return;
+                }
 
-            // Initialize charts after JS is loaded
-            setTimeout(function () {
-                // Look for all chart canvases and initialize them
+                const scriptElement = document.createElement('script');
+                scriptElement.text = jsCode;
+
+                // Once our custom JS is loaded, initialize charts
+                scriptElement.onload = function () {
+                    initializeCharts();
+                };
+
+                document.body.appendChild(scriptElement);
+            } catch (e) {
+                console.error('Error loading JavaScript:', e);
+            }
+
+            function initializeCharts() {
                 const chartCanvases = document.querySelectorAll('.chart-canvas');
                 chartCanvases.forEach(function (canvas) {
                     try {
                         const chartData = JSON.parse(canvas.dataset.chart);
                         const chartOptions = JSON.parse(canvas.dataset.options);
-                        if (typeof Chart !== 'undefined') {
-                            new Chart(canvas, {
-                                type: 'line',
-                                data: chartData,
-                                options: chartOptions
-                            });
-                        } else {
-                            console.error('Chart library not loaded');
+
+                        if (typeof Chart === 'undefined') {
+                            throw new Error('Chart.js library not loaded');
                         }
+
+                        new Chart(canvas, {
+                            type: 'line',
+                            data: chartData,
+                            options: chartOptions
+                        });
                     } catch (e) {
                         console.error('Error initializing chart:', e);
+                        console.error('Canvas:', canvas);
+                        console.error('Data:', canvas.dataset.chart);
+                        console.error('Options:', canvas.dataset.options);
                     }
                 });
-            }, 500);
+            }
         });
     </script>
-</head>
 
-<body>
     {% include './templates/header.html' %}
 
     {% include './templates/executive_summary.html' %}

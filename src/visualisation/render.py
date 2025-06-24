@@ -16,9 +16,24 @@ def generate_dashboard(baseline_dir="baseline", ongoing_dir="ongoing", output_di
 
         # Read static assets and embed them
         css_path = os.path.join("src", "visualisation", "template.css")
-        js_path = os.path.join("src", "visualisation", "charts.js")
         context["embedded_css"] = open(css_path, encoding="utf-8").read() if os.path.exists(css_path) else ""
-        context["embedded_js"] = open(js_path, encoding="utf-8").read() if os.path.exists(js_path) else ""
+
+        # Load and combine all JavaScript files in the correct order
+        js_files = [
+            os.path.join("src", "visualisation", "charts", "axisUtils.js"),
+            os.path.join("src", "visualisation", "charts", "tooltips.js"),
+            os.path.join("src", "visualisation", "charts", "lineChart.js"),
+            os.path.join("src", "visualisation", "charts", "barChart.js"),
+            os.path.join("src", "visualisation", "charts", "index.js"),
+        ]
+
+        combined_js = ""
+        for js_file in js_files:
+            if os.path.exists(js_file):
+                with open(js_file, encoding="utf-8") as f:
+                    combined_js += f.read() + "\n"
+
+        context["embedded_js"] = combined_js
 
         # Setup Jinja2 environment and load template
         env = Environment(loader=FileSystemLoader("src/visualisation"))
