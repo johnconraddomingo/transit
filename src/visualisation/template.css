@@ -220,25 +220,24 @@ body {
 }
 
 .productivity-index-banner {
-    background-color: #4E9896;
-    color: #FFCD05;
+
+    color: #4E9896;
     padding: 20px;
     margin: 40px auto;
     border-radius: 10px;
     text-align: center;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+
     max-width: 500px;
 }
 
 .index-label {
     font-size: 1.2em;
     letter-spacing: 0.5px;
-    margin-bottom: 8px;
     font-weight: 600;
 }
 
 .index-value {
-    font-size: 2.4em;
+    font-size: 3.0em;
     font-weight: bold;
 }
 
@@ -380,8 +379,32 @@ body {
     width: 100%;
 }
 
-/* All bar chart styling is now handled directly in JavaScript for consistency */
+.executive-summary-metric.productivity-widget {
+    flex: 1 1 calc(33.333% - 20px);
+    min-width: 280px;
+    text-align: center;
+    background-color: #4E9896;
+    color: white;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding: 24px 16px;
+}
 
-.executive-summary-metric .chart-legend {
-    margin-bottom: 10px;
+.executive-summary-metric.productivity-widget .metric-title {
+    color: #FFCD05;
+    font-size: 1.2em;
+    margin-bottom: 16px;
+    width: 100%;
+    text-align: center;
+}
+
+.executive-summary-metric.productivity-widget .metric-value {
+    color: white;
+    font-size: 4.2em;
+    font-weight: bold;
+    line-height: 1.2;
+    width: 100%;
+    text-align: center;
 }
