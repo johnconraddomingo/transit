@@ -123,12 +123,19 @@ def prepare_dashboard_context(config, baseline_data, time_series_data, average_d
             "name": category_name,
             "color": category_color,
             "metrics": metrics
-        })
+        })    # Executive summary metrics (e.g., Story Points, AI Adoption Rate, Deployment Frequency)
+    executive_summary_metrics = []
+    # Add Story Points, AI Adoption Rate, and Deployment Frequency if present
+    for category in categories:
+        for metric in category["metrics"]:
+            if metric["key"] in ["s_story_points", "a_ai_adoption_rate", "d_deployment_frequency"]:
+                executive_summary_metrics.append(metric)
 
     return {
         "dashboard_title": config.get("dashboard_title", "Dashboard"),
         "logo_base64": logo_base64,
         "subtitle": subtitle,
         "categories": categories,
-        "overall_index": productivity_data.get("overall_index", 0)
+        "overall_index": productivity_data.get("overall_index", 0),
+        "executive_summary_metrics": executive_summary_metrics
     }

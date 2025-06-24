@@ -1,0 +1,18 @@
+<div class="executive-summary">
+    {% for metric in executive_summary_metrics %}
+    <div class="executive-summary-metric">
+        <div class="metric-title">{{ metric.label }}</div>
+
+        {% if metric.trend %}
+        <div class="metric-trend" style="background-color: {{ metric.trend.color }};">
+            {{ metric.trend.pct }} {{ metric.trend.arrow }} ({{ metric.trend.description }})
+        </div>
+        {% endif %}
+        <div class="chart-container">
+            <canvas id="executive_{{ metric.chart_id }}" class="chart-canvas"
+                data-chart='{{ metric.chart_data | tojson }}'
+                data-options='{{ metric.chart_options | tojson }}'></canvas>
+        </div>
+    </div>
+    {% endfor %}
+</div>

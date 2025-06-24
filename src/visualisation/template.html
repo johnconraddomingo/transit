@@ -1,125 +1,174 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>{{ dashboard_title }}</title>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <style>{{ embedded_css | safe }}</style>
-    <script>{{ embedded_js | safe }}</script>
-</head>
-<body>
-    <div class="dashboard-header">
-        <img src="{{ logo_base64 }}" alt="Logo" class="dashboard-logo" />
-        <h1 class="dashboard-title">{{ dashboard_title }}</h1>
-        <p class="dashboard-subtitle">{{ subtitle }}</p>
-    </div>
+{% extends 'templates/base.html' %}
 
-    {% for category in categories %}
-    <details class="category-section" open>
-        <summary class="category-header" style="border-left-color: {{ category.color }};">
-            {{ category.name }}
-        </summary>
-        <div class="metrics-grid">
-            {% for metric in category.metrics %}
-            <div class="metric-card">
-                <div class="metric-title">{{ metric.label }}</div>
-                <div class="metric-value">{{ metric.current }}</div>
-                <div class="metric-baseline">Baseline: {{ metric.baseline }}</div>
-                <div class="metric-average">New Average: {{ metric.average }}</div>
-                
-                {% if metric.trend %}
-                <div class="metric-trend" style="background-color: {{ metric.trend.color }};">
-                    {{ metric.trend.pct }} {{ metric.trend.arrow }} ({{ metric.trend.description }})
+{% block content %}
+<div class="dashboard-header">
+    <img src="{{ logo_base64 }}" alt="Logo" class="dashboard-logo" />
+    <h1 class="dashboard-title">{{ dashboard_title }}</h1>
+    <p class="dashboard-subtitle">{{ subtitle }}</p>
+</div>
+
+<div class="executive-summary">
+    <h2>Executive Summary</h2>
+    {% for metric in executive_summary_metrics %}
+    <div class="executive-summary-metric">
+        <div class="metric-title">{{ metric.label }}</div>
+        <div class="metric-value">{{ metric.current }}</div>
+        <div class="metric-baseline">Baseline: {{ metric.baseline }}</div>
+        <div class="metric-average">New Average: {{ metric.average }}</div>
+        {% if metric.trend %}
+        <div class="metric-trend" style="background-color: {{ metric.trend.color }};">
+            {{ metric.trend.pct }} {{ metric.trend.arrow }} ({{ metric.trend.description }})
+        </div>
+        {% endif %} <div class="chart-container">
+            <canvas id="executive_{{ metric.chart_id }}" class="chart-canvas"
+                data-chart='{{ metric.chart_data | tojson }}' data-options='{{ metric.chart_options | tojson }}'
+                data-metric-key="{{ metric.key }}"></canvas>
+        </div>
+        <div class="chart-legend">
+            {% if metric.key == 'd_deployment_frequency' %}
+            <div class="legend-item">
+                <div
+                    style="width: 15px; height: 15px; background-color: #4E9896; border-radius: 2px; margin-right: 5px;">
+                </div>
+                <span>Frequency</span>
+            </div>
+            <div class="legend-item">
+                <span class="legend-line-dash"></span>
+                <span>Baseline</span>
+            </div>
+            {% else %}
+            <div class="legend-item">
+                <span class="legend-line-dot"></span>
+                <span>Actual</span>
+            </div>
+            <div class="legend-item">
+                <span class="legend-line-dash"></span>
+                <span>Baseline</span>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+    {% endfor %}
+</div>
+
+{% for category in categories %}
+<details class="category-section" open>
+    <summary class="category-header" style="border-left-color: {{ category.color }};">
+        {{ category.name }}
+    </summary>
+    <div class="metrics-grid">
+        {% for metric in category.metrics %}
+        <div class="metric-card">
+            <div class="metric-title">{{ metric.label }}</div>
+            <div class="metric-value">{{ metric.current }}</div>
+            <div class="metric-baseline">Baseline: {{ metric.baseline }}</div>
+            <div class="metric-average">New Average: {{ metric.average }}</div>
+
+            {% if metric.trend %}
+            <div class="metric-trend" style="background-color: {{ metric.trend.color }};">
+                {{ metric.trend.pct }} {{ metric.trend.arrow }} ({{ metric.trend.description }})
+            </div>
+            {% endif %}
+
+            <!-- Historical data collapsible table -->
+            <details class="metric-history">
+                <summary><strong>Historical Data</strong></summary>
+                <div class="metric-history-content">
+                    {% for point in metric.chart_data %}
+                    <div class="metric-history-item">
+                        <span>{{ point.label }}</span>
+                        <span>{{ point.value }}</span>
+                    </div>
+                    {% endfor %}
+                </div>
+            </details>
+
+            <!-- Line chart -->
+            <div class="chart-container"> <canvas id="{{ metric.chart_id }}" class="chart-canvas"
+                    data-chart='{{ metric.chart_data | tojson }}' data-options='{{ metric.chart_options | tojson }}'
+                    data-metric-key="{{ metric.key }}"></canvas>
+            </div>
+            <div class="chart-legend">
+                {% if metric.key == 'd_deployment_frequency' %}
+                <div class="legend-item">
+                    <div
+                        style="width: 15px; height: 15px; background-color: #4E9896; border-radius: 2px; margin-right: 5px;">
+                    </div>
+                    <span>Frequency</span>
+                </div>
+                <div class="legend-item">
+                    <span class="legend-line-dash"></span>
+                    <span>Baseline</span>
+                </div>
+                {% else %}
+                <div class="legend-item">
+                    <span class="legend-line-dot"></span>
+                    <span>Actual</span>
+                </div>
+                <div class="legend-item">
+                    <span class="legend-line-dash"></span>
+                    <span>Baseline</span>
                 </div>
                 {% endif %}
-
-                <!-- Historical data collapsible table -->
-                <details class="metric-history">
-                    <summary><strong>Historical Data</strong></summary>
-                    <div class="metric-history-content">
-                        {% for point in metric.chart_data %}
-                        <div class="metric-history-item">
-                            <span>{{ point.label }}</span>
-                            <span>{{ point.value }}</span>
-                        </div>
-                        {% endfor %}
-                    </div>
-                </details>
-
-                <!-- Line chart -->
-                <div class="chart-container">
-                    <canvas id="{{ metric.chart_id }}" class="chart-canvas"
-                            data-chart='{{ metric.chart_data | tojson }}'
-                            data-options='{{ metric.chart_options | tojson }}'></canvas>
-                </div>
-                <div class="chart-legend">
-                    <div class="legend-item">
-                        <span class="legend-line-dot"></span>
-                        <span>Actual</span>
-                    </div>
-                    <div class="legend-item">
-                        <span class="legend-line-dash"></span>
-                        <span>Baseline</span>
-                    </div>
-                </div>
             </div>
-            {% endfor %}
         </div>
-    </details>
-    {% endfor %}
-
-    <!-- Productivity index summary table -->
-    <div class="productivity-index-banner">
-        <div class="index-label">Overall Productivity Index</div>
-        <div class="index-value">{{ overall_index }}%</div>
+        {% endfor %}
     </div>
+</details>
+{% endfor %}
 
-    <div class="productivity-summary">
-        <div class="productivity-header">Productivity Metrics Dashboard</div>
-        <table class="productivity-table">
-            <thead>
-                <tr>
-                    <th>Dimension</th>
-                    <th>Metric</th>
-                    <th>Baseline</th>
-                    <th>Latest Value</th>
-                    <th>New Average</th>
-                    <th>Productivity Comparison</th>
-                    <th>Weight</th>
-                    <th>Index Input</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for category in categories %}
-                <tr class="category-header-row">
-                    <td><strong>{{ category.name }}</strong></td>
-                    <td colspan="7"></td>
-                </tr>
-                {% for metric in category.metrics %}
-                <tr>
-                    <td></td>
-                    <td>{{ metric.label }}</td>
-                    <td>{{ metric.baseline }}</td>
-                    <td>{{ metric.current }}</td>
-                    <td>{{ metric.average }}</td>
-                    <td>{{ metric.trend.pct if metric.trend else 'N/A' }}</td>
-                    <td>{{ metric.chart_options.weight_pct if metric.chart_options.weight_pct is defined else '—' }}</td>
-                    <td>
-                        {% if metric.index_input is defined and metric.index_input != 0 %}
-                            {{ "%.2f%%"|format(metric.index_input) }}
-                        {% else %}
-                             —
-                        {% endif %}
-                    </td>
-                </tr>
-                {% endfor %}
-                {% endfor %}
-            </tbody>
-        </table>
-    </div>
+<!-- Productivity index summary table -->
+<div class="productivity-index-banner">
+    <div class="index-label">Overall Productivity Index</div>
+    <div class="index-value">{{ overall_index }}%</div>
+</div>
 
-    <div class="generation-info">
-        Generated on {{ generation_date }} | GitHub Copilot Metrics Framework
-    </div>
-</body>
-</html>
+<div class="productivity-summary">
+    <div class="productivity-header">Productivity Metrics Dashboard</div>
+    <table class="productivity-table">
+        <thead>
+            <tr>
+                <th>Dimension</th>
+                <th>Metric</th>
+                <th>Baseline</th>
+                <th>Latest Value</th>
+                <th>New Average</th>
+                <th>Productivity Comparison</th>
+                <th>Weight</th>
+                <th>Index Input</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for category in categories %}
+            <tr class="category-header-row">
+                <td><strong>{{ category.name }}</strong></td>
+                <td colspan="7"></td>
+            </tr>
+            {% for metric in category.metrics %}
+            <tr>
+                <td></td>
+                <td>{{ metric.label }}</td>
+                <td>{{ metric.baseline }}</td>
+                <td>{{ metric.current }}</td>
+                <td>{{ metric.average }}</td>
+                <td>{{ metric.trend.pct if metric.trend else 'N/A' }}</td>
+                <td>{{ metric.chart_options.weight_pct if metric.chart_options.weight_pct is defined else '—' }}
+                </td>
+                <td>
+                    {% if metric.index_input is defined and metric.index_input != 0 %}
+                    {{ "%.2f%%"|format(metric.index_input) }}
+                    {% else %}
+                    —
+                    {% endif %}
+                </td>
+            </tr>
+            {% endfor %}
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<div class="generation-info">
+    Generated on {{ generation_date }} | GitHub Copilot Metrics Framework
+</div>
+{% endblock %}

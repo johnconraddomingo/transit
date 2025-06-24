@@ -1,0 +1,49 @@
+<!-- Productivity index summary table -->
+<div class="productivity-index-banner">
+    <div class="index-label">Overall Productivity Index</div>
+    <div class="index-value">{{ overall_index }}%</div>
+</div>
+
+<div class="productivity-summary">
+    <div class="productivity-header">Productivity Metrics Dashboard</div>
+    <table class="productivity-table">
+        <thead>
+            <tr>
+                <th>Dimension</th>
+                <th>Metric</th>
+                <th>Baseline</th>
+                <th>Latest Value</th>
+                <th>New Average</th>
+                <th>Productivity Comparison</th>
+                <th>Weight</th>
+                <th>Index Input</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for category in categories %}
+            <tr class="category-header-row">
+                <td><strong>{{ category.name }}</strong></td>
+                <td colspan="7"></td>
+            </tr>
+            {% for metric in category.metrics %}
+            <tr>
+                <td></td>
+                <td>{{ metric.label }}</td>
+                <td>{{ metric.baseline }}</td>
+                <td>{{ metric.current }}</td>
+                <td>{{ metric.average }}</td>
+                <td>{{ metric.trend.pct if metric.trend else 'N/A' }}</td>
+                <td>{{ metric.chart_options.weight_pct if metric.chart_options.weight_pct is defined else '—' }}</td>
+                <td>
+                    {% if metric.index_input is defined and metric.index_input != 0 %}
+                    {{ "%.2f%%"|format(metric.index_input) }}
+                    {% else %}
+                    —
+                    {% endif %}
+                </td>
+            </tr>
+            {% endfor %}
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
