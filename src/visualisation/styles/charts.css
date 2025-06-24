@@ -1,0 +1,67 @@
+/* Chart container and canvas styling */
+.chart-container {
+    margin-top: 20px;
+    width: 100%;
+    height: 200px;
+    position: relative;
+}
+
+.chart-canvas {
+    width: 100%;
+    height: 100%;
+    border: 1px solid #e1e4e8;
+    border-radius: 6px;
+    background-color: #f8f9fa;
+}
+
+/* Chart legend styling */
+.chart-legend {
+    margin-top: 10px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 12px;
+}
+
+.legend-item {
+    display: flex;
+    align-items: center;
+    margin-right: 15px;
+}
+
+.legend-line-dot {
+    position: relative;
+    width: 30px;
+    height: 2px;
+    background-color: #4285F4;
+    margin-right: 5px;
+    border-radius: 1px;
+}
+
+.legend-line-dot::after {
+    content: '';
+    width: 6px;
+    height: 6px;
+    background-color: #4285F4;
+    border-radius: 50%;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}
+
+.legend-line-dash {
+    display: inline-block;
+    width: 30px;
+    height: 0;
+    border-top: 2px dashed #CCCCCC;
+    margin-right: 5px;
+}
+
+/* Specialized chart containers */
+.donut-chart-container {
+    margin-top: 10px;
+    margin-bottom: 10px;
+    height: 180px;
+    width: 180px;
+}

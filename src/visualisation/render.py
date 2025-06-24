@@ -16,7 +16,20 @@ def generate_dashboard(baseline_dir="baseline", ongoing_dir="ongoing", output_di
 
         # Read static assets and embed them
         css_path = os.path.join("src", "visualisation", "template.css")
-        context["embedded_css"] = open(css_path, encoding="utf-8").read() if os.path.exists(css_path) else ""
+        base_css_path = os.path.join("src", "visualisation", "styles", "base.css")
+        charts_css_path = os.path.join("src", "visualisation", "styles", "charts.css")
+        dashboard_css_path = os.path.join("src", "visualisation", "styles", "dashboard.css")
+        exec_css_path = os.path.join("src", "visualisation", "styles", "executive-summary.css")
+        metrics_css_path = os.path.join("src", "visualisation", "styles", "metrics.css")
+        productivity_css_path = os.path.join("src", "visualisation", "styles", "productivity.css")
+
+        embedded_css = ""
+        for path in [css_path, base_css_path, charts_css_path, dashboard_css_path, exec_css_path, metrics_css_path, productivity_css_path]:
+            if os.path.exists(path):
+                with open(path, encoding="utf-8") as f:
+                    embedded_css += f.read() + "\n"
+
+        context["embedded_css"] = embedded_css
 
         # Load and combine all JavaScript files in the correct order
         js_files = [

@@ -1,0 +1,51 @@
+/* Dashboard header styling */
+.dashboard-header {
+    text-align: center;
+    margin-bottom: 40px;
+}
+
+.dashboard-logo {
+    max-width: 300px;
+    height: auto;
+    margin-bottom: 20px;
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.dashboard-title {
+    font-size: 28px;
+    font-weight: 600;
+    margin-bottom: 10px;
+    color: #24292e;
+}
+
+.dashboard-subtitle {
+    font-size: 16px;
+    color: #586069;
+}
+
+/* Category section styling */
+.category-section {
+    margin-bottom: 40px;
+    background-color: #fff;
+    border-radius: 8px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+}
+
+.category-header {
+    padding: 15px 20px;
+    font-size: 18px;
+    font-weight: 600;
+    background-color: #4E9896;
+    /* Unified muted teal color */
+    color: #fff;
+}
+
+.metrics-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+    gap: 20px;
+    padding: 20px;
+}

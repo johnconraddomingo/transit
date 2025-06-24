@@ -1,0 +1,113 @@
+/* Productivity summary section */
+.productivity-summary {
+    margin-top: 40px;
+    margin-bottom: 40px;
+    background-color: #fff;
+    border-radius: 8px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+    padding: 20px;
+}
+
+.productivity-header {
+    font-size: 22px;
+    font-weight: 600;
+    margin-bottom: 20px;
+    color: #24292e;
+    text-align: center;
+}
+
+/* Productivity data table */
+.productivity-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 20px;
+}
+
+.productivity-table th,
+.productivity-table td {
+    padding: 10px;
+    border: 1px solid #e1e4e8;
+    text-align: center;
+}
+
+.productivity-table th {
+    background-color: #f6f8fa;
+    font-weight: 600;
+}
+
+.productivity-table tr.category-header-row {
+    background-color: #f1f4f8;
+    font-weight: 600;
+}
+
+/* Productivity index display */
+.productivity-index {
+    font-size: 1.6em;
+    font-weight: bold;
+    color: #1a73e8;
+    margin: 20px 0;
+    text-align: center;
+    background-color: #f1f8ff;
+    padding: 12px;
+    border-radius: 8px;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
+}
+
+.productivity-index-banner {
+    color: #4E9896;
+    padding: 20px;
+    margin: 40px auto;
+    border-radius: 10px;
+    text-align: center;
+    max-width: 500px;
+}
+
+.index-label {
+    font-size: 1.2em;
+    letter-spacing: 0.5px;
+    font-weight: 600;
+}
+
+.index-value {
+    font-size: 3.0em;
+    font-weight: bold;
+}
+
+.productivity-note {
+    font-style: italic;
+    color: #586069;
+    text-align: center;
+    margin-top: 10px;
+}
+
+/* Productivity widget styling */
+.executive-summary-metric.productivity-widget {
+    flex: 1 1 calc(33.333% - 20px);
+    min-width: 280px;
+    text-align: center;
+    background-color: #4E9896;
+    color: white;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding: 24px 16px;
+}
+
+.executive-summary-metric.productivity-widget .metric-title {
+    color: #FFCD05;
+    font-size: 1.2em;
+    margin-bottom: 16px;
+    width: 100%;
+    text-align: center;
+}
+
+.executive-summary-metric.productivity-widget .metric-value {
+    color: white;
+    font-size: 4.2em;
+    font-weight: bold;
+    line-height: 1.2;
+    width: 100%;
+    text-align: center;
+}

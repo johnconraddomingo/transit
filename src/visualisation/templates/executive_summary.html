@@ -11,8 +11,7 @@
         </div>
         {% endif %}
         <div class="donut-chart-container">
-            <canvas id="active_users_donut" class="chart-canvas no-border"
-                data-chart='{{ active_users.chart_data | tojson }}'
+            <canvas id="active_users_donut" class="chart-canvas" data-chart='{{ active_users.chart_data | tojson }}'
                 data-options='{{ active_users.chart_options | tojson }}' data-type="donut"
                 style="border: none;"></canvas>
         </div>
