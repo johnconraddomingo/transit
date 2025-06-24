@@ -78,12 +78,9 @@ function drawLineGraph(canvasId, data, options = {}) {
         ctx.strokeStyle = baselineColor;
         ctx.beginPath();
         ctx.moveTo(padding, y);
-        ctx.lineTo(width - padding, y);
-        ctx.stroke();
+        ctx.lineTo(width - padding, y); ctx.stroke();
         ctx.setLineDash([]);
-        ctx.fillStyle = textColor;
-        ctx.font = '10px sans-serif';
-        ctx.fillText('Baseline', padding, y - 5);
+        // Baseline label removed as requested
     }
 
     // Draw line
@@ -332,12 +329,7 @@ function drawBarChart(containerId, data, options = {}) {
             ctx.moveTo(padding, y);
             ctx.lineTo(width - padding, y);
             ctx.stroke();
-            ctx.setLineDash([]);
-
-            // Draw baseline label
-            ctx.fillStyle = '#666';
-            ctx.font = '10px sans-serif';
-            ctx.fillText('Baseline', width - padding - 50, y - 5);
+            ctx.setLineDash([]);            // Baseline label removed as requested
         }
 
         // Draw Y-axis labels
@@ -396,12 +388,9 @@ function drawBarChart(containerId, data, options = {}) {
                 ctx.strokeStyle = baselineColor;
                 ctx.beginPath();
                 ctx.moveTo(padding, y);
-                ctx.lineTo(width - padding, y);
-                ctx.stroke();
+                ctx.lineTo(width - padding, y); ctx.stroke();
                 ctx.setLineDash([]);
-                ctx.fillStyle = '#666';
-                ctx.font = '10px sans-serif';
-                ctx.fillText('Baseline', width - padding - 50, y - 5);
+                // Baseline label removed as requested
             }
 
             // Redraw Y-axis labels

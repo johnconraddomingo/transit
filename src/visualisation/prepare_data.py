@@ -58,15 +58,13 @@ def prepare_dashboard_context(config, baseline_data, time_series_data, average_d
 
             formatted_current = format_value(current_val, fmt) if current_val is not None else "N/A"
             formatted_baseline = format_value(baseline_val, fmt) if baseline_val is not None else "N/A"
-            formatted_average = format_value(average_val, fmt) if average_val is not None else "N/A"
-
-            # Collect monthly trend data
+            formatted_average = format_value(average_val, fmt) if average_val is not None else "N/A"            # Collect monthly trend data
             chart_data = []
             for dt in sorted(time_series_data.keys()):
                 val = time_series_data[dt].get(metric_key)
                 if val is not None:
                     chart_data.append({
-                        "label": dt.strftime("%b %Y"),
+                        "label": dt.strftime("%b"),  # Only show month name without year
                         "value": val
                     })
 
