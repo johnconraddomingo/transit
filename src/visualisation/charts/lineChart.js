@@ -4,6 +4,13 @@ window.drawLineGraph = function (canvasId, data, options = {}) {
 
     console.log('[Chart Debug]', { canvasId, data, options });
 
+    // Destroy existing chart on this canvas if it exists
+    const existingChart = Chart.getChart(canvasId);
+    if (existingChart) {
+        console.log('Destroying existing chart for', canvasId);
+        existingChart.destroy();
+    }
+
     const ctx = canvas.getContext('2d');
 
     // Make canvas responsive

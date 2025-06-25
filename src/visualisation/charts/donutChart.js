@@ -8,6 +8,13 @@ window.drawDonutChart = function (containerId, data, options = {}) {
         return;
     }
 
+    // Destroy existing chart on this canvas if it exists
+    const existingChart = Chart.getChart(containerId);
+    if (existingChart) {
+        console.log('Destroying existing chart for', containerId);
+        existingChart.destroy();
+    }
+
     const canvas = container;
     const ctx = canvas.getContext('2d');    // Create a Chart.js donut chart
     new Chart(canvas, {
