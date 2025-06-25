@@ -124,11 +124,10 @@ def prepare_dashboard_context(config, baseline_data, time_series_data, average_d
             })
 
     # Executive summary metrics (e.g., Story Points, AI Adoption Rate, Deployment Frequency)
-    executive_summary_metrics = []
-    # Add Story Points, AI Adoption Rate, and Deployment Frequency if present
+    executive_summary_metrics = []    # Add Story Points, AI Adoption Rate, Bugs, and Deployment Frequency if present
     for category in categories:
         for metric in category["metrics"]:
-            if metric["key"] in ["s_story_points", "a_ai_adoption_rate", "d_deployment_frequency"]:
+            if metric["key"] in ["s_story_points", "a_ai_adoption_rate", "q_bugs", "d_deployment_frequency"]:
                 executive_summary_metrics.append(metric)
 
     # Prepare active users data for donut chart
