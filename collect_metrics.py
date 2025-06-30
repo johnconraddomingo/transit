@@ -70,7 +70,7 @@ def main():
     """Main entry point for the application."""
  
  
-    logger.info (0, "STARTING METRICS COLLECTION...")
+    logger.info (0, "STARTING METRICS COLLECTION")
  
     parser = argparse.ArgumentParser(description='Collect metrics for projects.')
     parser.add_argument('year_month', help='Year and month in format YYYY-MM (e.g. 2025-05)')
@@ -222,7 +222,7 @@ def main():
         if code_coverage is not None:
             consolidated_results['q_coverage'] += code_coverage
             coverage_scan_count += 1
-            logger.info(2, f"✓ Code Coverage: {code_coverage}%")
+            logger.info(2, f"✓ Code Coverage: {code_coverage * 100:.2f}%")
         else:
             logger.warning(2, f"No code coverage data available from SonarQube for {scan}")
            
@@ -283,11 +283,13 @@ def main():
    
     # PR Review Time
     if pr_review_time_count > 0:
-        consolidated_results['s_pr_review_time'] = consolidated_results['s_pr_review_time'] / pr_review_time_count
+        consolidated_results['s_pr_review_time'] = round(
+            consolidated_results['s_pr_review_time'] / pr_review_time_count, 2
+        )
  
      # Average code coverage separately using count of scans with actual coverage data
     if coverage_scan_count > 0:
-        consolidated_results['q_coverage'] /= coverage_scan_count
+        consolidated_results['q_coverage'] = round(consolidated_results['q_coverage'] / coverage_scan_count, 2)
  
     # Exporting
     logger.info(0, "Exporting Results...")
@@ -301,4 +303,3 @@ def main():
  
 if __name__ == "__main__":
     main()
- 

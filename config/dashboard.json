@@ -37,7 +37,7 @@
     "a_ai_usage": {
       "label": "AI Usage",
       "category": "Adoption",
-      "format": "number",
+      "format": "percentage",
       "weight": 0.25
     },
     "a_code_suggestions": {
