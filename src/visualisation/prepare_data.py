@@ -91,15 +91,23 @@ def prepare_dashboard_context(config, baseline_data, time_series_data, average_d
             # Trend analysis
             trend = None
             if average_val is not None and baseline_val is not None:
-                pct = calculate_trend(average_val, baseline_val)
-                arrow = "▲" if pct > 0 else "▼"
-                better = "Better" if (pct > 0 and not is_inverse) or (pct < 0 and is_inverse) else "Worse"
-                trend = {
-                    "pct": f"{abs(pct):.1f}%",
-                    "arrow": arrow,
-                    "description": better,
-                    "color": get_trend_color(pct, is_inverse)
-                }            # Combine metric data
+                if average_val == baseline_val:
+                    trend = {
+                        "pct": "0.0%",
+                        "arrow": "—",
+                        "description": "No Change",
+                        "color": "#808080"  # Neutral gray color for no change
+                    }
+                else:
+                    pct = calculate_trend(average_val, baseline_val)
+                    arrow = "▲" if pct > 0 else "▼"
+                    better = "Better" if (pct > 0 and not is_inverse) or (pct < 0 and is_inverse) else "Worse"
+                    trend = {
+                        "pct": f"{abs(pct):.1f}%",
+                        "arrow": arrow,
+                        "description": better,
+                        "color": get_trend_color(pct, is_inverse)
+                    }
             metrics.append({
                 "key": metric_key,
                 "label": label,
