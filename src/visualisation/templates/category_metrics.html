@@ -45,8 +45,12 @@
                     <span>Baseline</span>
                 </div>
             </div>
+            <div class="metric-info-icon" role="button" aria-label="Show description" onclick="toggleDescription(this)">
+                i</div>
+            <div class="metric-description-popup">{{ metric.description }}</div>
         </div>
         {% endfor %}
     </div>
+
 </details>
 {% endfor %}

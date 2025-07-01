@@ -26,107 +26,124 @@
       "label": "Number of Active Users",
       "category": "Adoption",
       "format": "number",
-      "weight": 0.25
+      "weight": 0.25,
+      "description": "Gets the maximum total_active_users from the GitHub Copilot API."
     },
     "a_ai_adoption_rate": {
       "label": "AI Adoption Rate",
       "category": "Adoption",
       "format": "percentage",
-      "weight": 0.25
+      "weight": 0.25,
+      "description": "The average of the total accepted divided by suggested lines from the GitHub Copilot API."
     },
     "a_ai_usage": {
       "label": "AI Usage",
       "category": "Adoption",
       "format": "percentage",
-      "weight": 0.25
+      "weight": 0.25,
+      "description": "Sums the total_chats from the GitHub Copilot API."
     },
     "a_code_suggestions": {
       "label": "Code Lines Suggested by Copilot",
       "category": "Adoption",
       "format": "number",
-      "weight": 0.125
+      "weight": 0.125,
+      "description": "Sums the total_code_lines_suggested from the GitHub Copilot API."
     },
     "a_code_accepted": {
       "label": "Code Lines Accepted from Copilot",
       "category": "Adoption",
       "format": "number",
-      "weight": 0.125
+      "weight": 0.125,
+      "description": "Sums the total_code_lines_accepted from the GitHub Copilot API."
     },
     "s_merged_prs": {
       "label": "Number of Merged PRs",
       "category": "Speed",
       "format": "number",
-      "weight": 0.34
+      "weight": 0.34,
+      "description": "Represents the total number of merged pull requests from BitBucket."
     },
     "s_pr_review_time": {
       "label": "Avg PR Review Time (Mins)",
       "category": "Speed",
       "format": "number",
       "inverse": true,
-      "weight": 0.33
+      "weight": 0.33,
+      "description": "Measures the average time taken to review pull requests (in minutes) from BitBucket."
     },
     "s_story_points": {
       "label": "Story Points (Squad Level)",
       "category": "Speed",
       "format": "number",
-      "weight": 0.33
+      "weight": 0.33,
+      "description": "Tracks the total story points completed per Project."
     },
     "q_code_smells": {
       "label": "Code Quality / Code Smells",
       "category": "Quality",
       "format": "number",
       "inverse": true,
-      "weight": 0.25
+      "weight": 0.25,
+      "description": "Total number of Code Smells identified via SonarQube for the given month"
     },
     "q_coverage": {
       "label": "Unit Test Coverage",
       "category": "Quality",
       "format": "percentage",
-      "weight": 0.25
+      "weight": 0.25,
+      "description": "Represents the latest percentage of code covered by unit tests via SonarQube for the given month."
     },
     "q_bugs": {
       "label": "Bugs",
       "category": "Quality",
       "format": "number",
       "inverse": true,
-      "weight": 0.25
+      "weight": 0.25,
+      "description": "Total number of Bugs identified via SonarQube for the given month"
     },
     "q_vulnerabilities": {
       "label": "Vulnerabilities",
       "category": "Quality",
       "format": "number",
       "inverse": true,
-      "weight": 0.25
+      "weight": 0.25,
+      "description": "Total number of Vulnerabilities identified via SonarQube for the given month"
     },
     "e_user_satisfaction": {
       "label": "User Satisfaction",
       "category": "Experience",
       "format": "percentage",
-      "weight": 0.25
+      "weight": 0.25,
+      "description": "Measures the percentage of users satisfied with the platform."
     },
     "e_adoption": {
       "label": "Adoption & Frequency",
       "category": "Experience",
       "format": "percentage",
-      "weight": 0.25
+      "weight": 0.25,
+      "description": "Tracks the frequency and adoption rate of the platform's features."
     },
     "e_productivity": {
       "label": "Productivity, Quality & Benefits Sentiments",
       "category": "Experience",
       "format": "percentage",
-      "weight": 0.25
+      "weight": 0.25,
+      "description": "Represents user sentiments regarding productivity, quality, and benefits."
     },
     "e_use_cases": {
       "label": "Use Cases",
       "category": "Experience",
       "format": "number",
-      "weight": 0.25
+      "weight": 0.25,
+      "description": "Counts the number of distinct use cases implemented by users."
     },
     "d_deployment_frequency": {
       "label": "Deployment Frequency",
       "category": "Delivery",
       "format": "number",
-      "weight": 1.0
+      "weight": 1.0,
+      "description": "The total number of pipeline runs for the selected projects."
     }
   }
 }

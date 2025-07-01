@@ -22,9 +22,10 @@ def generate_dashboard(baseline_dir="baseline", ongoing_dir="ongoing", output_di
         exec_css_path = os.path.join("src", "visualisation", "styles", "executive-summary.css")
         metrics_css_path = os.path.join("src", "visualisation", "styles", "metrics.css")
         productivity_css_path = os.path.join("src", "visualisation", "styles", "productivity.css")
+        description_tooltip_css_path = os.path.join("src", "visualisation", "styles", "description-tooltip.css")
 
         embedded_css = ""
-        for path in [css_path, base_css_path, charts_css_path, dashboard_css_path, exec_css_path, metrics_css_path, productivity_css_path]:
+        for path in [css_path, base_css_path, charts_css_path, dashboard_css_path, exec_css_path, metrics_css_path, productivity_css_path, description_tooltip_css_path]:
             if os.path.exists(path):
                 with open(path, encoding="utf-8") as f:
                     embedded_css += f.read() + "\n"
@@ -38,6 +39,7 @@ def generate_dashboard(baseline_dir="baseline", ongoing_dir="ongoing", output_di
             os.path.join("src", "visualisation", "charts", "lineChart.js"),
             os.path.join("src", "visualisation", "charts", "barChart.js"),
             os.path.join("src", "visualisation", "charts", "donutChart.js"),
+            os.path.join("src", "visualisation", "charts", "descriptionToggle.js"),
             os.path.join("src", "visualisation", "charts", "index.js"),
         ]
 

@@ -112,7 +112,8 @@ def prepare_dashboard_context(config, baseline_data, time_series_data, average_d
                 "chart_options": chart_options,
                 "index_input": productivity_data.get("index_inputs", {}).get(metric_key),
                 "weight_pct": weight_pct,
-                "global_weight": global_weight
+                "global_weight": global_weight,
+                "description": meta.get("description")
             })
 
         # Add category after processing all its metrics
