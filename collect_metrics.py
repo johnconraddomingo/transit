@@ -298,7 +298,12 @@ def main():
     exporter = CSVExporter()
     output_path = os.path.join(os.path.dirname(__file__), 'ongoing', f"{args.year_month}.csv")
     exporter.export(consolidated_results, output_path)
-   
+    
+    # Clean up any temporary cache files
+    logger.info(0, "Cleaning up temporary cache files...")
+    if 'bitbucket' in collector.data_sources:
+        collector.data_sources['bitbucket'].cleanup_cache()
+    
     logger.info(0, f"Metrics collection completed. Results exported to {output_path}")
  
 if __name__ == "__main__":
