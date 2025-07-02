@@ -76,7 +76,11 @@ You'll know the virtual environment is activated when you see `(venv)` at the be
            "github": {
                "url": "https://api.github.com",
                "enabled": true
-           }
+           },
+            "excel": {
+                "base_path": "",
+                "enabled": true
+          }
        }
    }
    ```
@@ -160,9 +164,18 @@ The application collects metrics from different data sources using their respect
 - `d_deployment_frequency`: Uses builds API to count successful deployments
 
 ### Experience Metrics
-- `e_user_satisfaction`: Manually added from survey results
-- `e_adoption`: Manually added from survey results
-- `e_productivity`: Manually added from survey results
+
+> The Experience Metrics generates the content based on the exported survey results. Place these GitHub Copilot Experience Feedback file and rename it accordingly based on the YYYY-MM.xlsx format from when it was generated and then place it on the same `ongoing` folder
+
+- `e_user_satisfaction`: Generated from the YYYY-MM.xlsx file survey result using Column Y. Getting the percentage of "Very disappointed"
+    - Question: How would you feel if you could no longer use GitHub Copilot? 
+- `e_adoption`: Generated from the YYYY-MM.xlsx file survey result using Column G. Getting the percentage of "Almost Always"
+    - Question: When you are coding, how often do you use GitHub Copilot? 
+- `e_productivity`: Generated from the YYYY-MM.xlsx file survey result using Columns T, U and V. Getting the percentage of "Strongly agree"
+    - Question: Complete tasks faster 
+    - Question: Learn from suggestions 
+    - Question: Save brainpower on repetitive tasks 
+    
 - `e_use_cases`: Manually added from survey results
 
 All API endpoints support both token-based and username/password authentication. Each request includes appropriate date filters (start/end) based on the specified year and month.
@@ -170,10 +183,19 @@ All API endpoints support both token-based and username/password authentication.
 ### Executive Summary
 At the top of the visualization report, a curated selection of key metrics is prominently displayed to highlight the most relevant insights and trends that are of general interest to stakeholders.
 
+The executive summary includes:
+- Key adoption and productivity metrics
+- Overall productivity index
+- Experience widgets showing survey data from Excel files (Writing New Code, Refactoring Code, Writing Tests)
+
 Inside the ``ongoing/all.csv`` contains a configuration of the total number of employees used to build the Number of Active Users Donut chart
 ```
 a_all_users,5000
 ```
+The Experience widgets are generated using the latest available YYYY-MM.xlsx file on the `ongoing` folder. It extracts survey responses from columns I, J, and K showing distribution of responses:
+  - Column I: Experience with writing new code
+  - Column J: Experience with refactoring existing code
+  - Column K: Experience with writing tests
 
 ## Usage
 
@@ -326,6 +348,11 @@ This allows you to:
 ### Dashboard Features
 
 The generated HTML dashboard includes:
+
+- **Executive Summary**: A concise overview of key metrics and insights
+  - Experience pie charts showing developer survey responses (writing new code, refactoring code, writing tests)
+  - Data is sourced from the latest Excel file in the ongoing folder (columns I, J, K)
+  - Interactive donut charts with clear legends showing response distribution
 
 - **Organized Metric Categories**: Metrics grouped into sections (Adoption, Speed, Quality, Experience, Delivery)
   - Each category is collapsible for better information management
