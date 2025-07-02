@@ -42,6 +42,7 @@ from src.data_sources.sonarqube import SonarQubeDataSource
 from src.data_sources.jira import JiraDataSource
 from src.data_sources.jenkins import JenkinsDataSource
 from src.data_sources.github import GitHubDataSource
+from src.data_sources.excel import ExcelDataSource
 from src.metrics.collector import MetricsCollector
 from src.metrics.exporters.csv_exporter import CSVExporter
  
@@ -119,6 +120,13 @@ def main():
         github_auth = tokens_config.get('github', {})
         github = GitHubDataSource(github_url, **github_auth)
         collector.register_data_source('github', github)
+        
+    if servers_config['servers']['excel'].get('enabled', True):
+        excel_base_path = servers_config['servers']['excel'].get('base_path', '')
+        excel_base_path = excel_base_path or os.path.join(os.path.dirname(__file__), 'ongoing')
+        excel_auth = tokens_config.get('excel', {})
+        excel = ExcelDataSource(excel_base_path, **excel_auth)
+        collector.register_data_source('excel', excel)
    
      # Initialize a single consolidated results dictionary for all projects
     consolidated_results = {
@@ -277,6 +285,30 @@ def main():
     else:
         logger.warning(2, "No AI adoption rate data available")
    
+    # Process survey results
+    logger.info(0, "Processing Survey Results")
+    
+    # Use the Excel data source to get the survey metrics
+    user_satisfaction = collector.collect_metric('user_satisfaction', org_name, year, month)
+    if user_satisfaction is not None:
+        consolidated_results['e_user_satisfaction'] = user_satisfaction
+        logger.info(1, f"✓ User Satisfaction Percentage: {round(user_satisfaction * 100, 4)}%")
+    else:
+        logger.warning(1, "No user satisfaction data available")
+        
+    adoption = collector.collect_metric('adoption', org_name, year, month)
+    if adoption is not None:
+        consolidated_results['e_adoption'] = adoption
+        logger.info(1, f"✓ Adoption Percentage: {round(adoption * 100, 4)}%")
+    else:
+        logger.warning(1, "No adoption data available")
+        
+    productivity = collector.collect_metric('productivity', org_name, year, month)
+    if productivity is not None:
+        consolidated_results['e_productivity'] = productivity
+        logger.info(1, f"✓ Productivity Percentage: {round(productivity * 100, 4)}%")
+    else:
+        logger.warning(1, "No productivity data available")
    
     # Averages
     logger.info(0, "Calculating Average Metrics")

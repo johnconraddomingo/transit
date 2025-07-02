@@ -27,6 +27,9 @@ class MetricsCollector:
             'bugs': ('sonarqube', 'get_bugs'),            
             'vulnerabilities': ('sonarqube', 'get_vulnerabilities'),
             'deployment_frequency': ('jenkins', 'get_deployment_frequency'),
+            'user_satisfaction': ('excel', 'get_survey_results'),
+            'adoption': ('excel', 'get_survey_results'),
+            'productivity': ('excel', 'get_survey_results'),
         }
         self.logger = logger
    
@@ -66,7 +69,12 @@ class MetricsCollector:
         method = getattr(data_source, method_name)
        
         try:
-            return method(project, year, month)
+            result = method(project, year, month)
+            
+            # Handle case where a method returns a dictionary of multiple metrics
+            if isinstance(result, dict) and metric_type in result:
+                return result[metric_type]
+            return result
         except Exception as e:
             self.logger.error(2, f"Error collecting metric '{metric_type}' for project '{project}': {e}")
             return None

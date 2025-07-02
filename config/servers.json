@@ -2,22 +2,26 @@
     "servers": {
         "bitbucket": {
             "url": "https://bitbucket.int.corp.sun",
-            "enabled": true
+            "enabled": false
         },
         "sonarqube": {
             "url": "https://sonar.int.corp.sun",
-            "enabled": true
+            "enabled": false
         },
         "jira": {
             "url": "https://jira.suncorp.app",
-            "enabled": true
+            "enabled": false
         },
         "jenkins": {
             "url": "https://alfred.int.corp.sun",
-            "enabled": true
+            "enabled": false
         },
         "github": {
             "url": "https://api.github.com",
+            "enabled": false
+        },
+        "excel": {
+            "base_path": "",
             "enabled": true
         }
     }
