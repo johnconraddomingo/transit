@@ -145,7 +145,7 @@ The application collects metrics from different data sources using their respect
 - `a_ai_usage`: Uses `/enterprises/{organization}/copilot/metrics` endpoint, sums `total_chats` for the month
 
 ### Bitbucket Metrics
-- `s_merged_prs`: Uses `/rest/api/1.0/projects/{project}/repos/{repo}/pull-requests` with `state=MERGED`
+- `s_merged_prs`: Uses `/rest/api/1.0/projects/{project}/repos/{repo}/pull-requests` with `state=ALL` and checks the status for each Pull Request
 - `s_pr_review_time`: Uses pull requests endpoint plus `/activities` to calculate time between creation and approval
 
 ### JIRA Metrics
@@ -166,6 +166,14 @@ The application collects metrics from different data sources using their respect
 - `e_use_cases`: Manually added from survey results
 
 All API endpoints support both token-based and username/password authentication. Each request includes appropriate date filters (start/end) based on the specified year and month.
+
+### Executive Summary
+At the top of the visualization report, a curated selection of key metrics is prominently displayed to highlight the most relevant insights and trends that are of general interest to stakeholders.
+
+Inside the ``ongoing/all.csv`` contains a configuration of the total number of employees used to build the Number of Active Users Donut chart
+```
+a_all_users,5000
+```
 
 ## Usage
 
