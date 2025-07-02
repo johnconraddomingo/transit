@@ -17,6 +17,14 @@ window.drawDonutChart = function (containerId, data, options = {}) {
 
     const canvas = container;
     const ctx = canvas.getContext('2d');    // Create a Chart.js donut chart
+
+    // Default to showing center text unless explicitly set to false
+    const showCenterText = options.showCenterText !== false;
+
+    // Determine if it's a pie chart (no hole) or donut chart (with hole)
+    const chartStyle = options.chartStyle || 'donut';
+    const cutoutPercentage = chartStyle === 'pie' ? '0%' : '60%';
+
     new Chart(canvas, {
         type: 'doughnut',
         data: {
@@ -29,7 +37,7 @@ window.drawDonutChart = function (containerId, data, options = {}) {
             }]
         },
         options: {
-            cutout: '60%',
+            cutout: cutoutPercentage, // Use the determined cutout percentage
             responsive: true,
             maintainAspectRatio: false,
             plugins: {
@@ -55,14 +63,16 @@ window.drawDonutChart = function (containerId, data, options = {}) {
                     },
                     color: '#000',
                     fontStyle: 'bold',
-                    sidePadding: 20
+                    sidePadding: 20,
+                    enabled: showCenterText
                 }
             }
         },
         plugins: [{
             id: 'customCenterText',
             afterDraw: function (chart) {
-                if (chart.config.options.plugins.customCenterText) {
+                if (chart.config.options.plugins.customCenterText &&
+                    chart.config.options.plugins.customCenterText.enabled) {
                     const centerConfig = chart.config.options.plugins.customCenterText;
                     const ctx = chart.ctx;
                     const centerX = chart.chartArea.left + (chart.chartArea.right - chart.chartArea.left) / 2;

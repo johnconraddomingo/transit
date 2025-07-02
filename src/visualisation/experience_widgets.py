@@ -39,12 +39,12 @@ def add_experience_widgets(html_content):
                     for label, value in survey_data['writing_new_code'].items()
                 ]
                 widgets_html.append(create_widget_html(
-                    "Experience: Writing New Code", 
+                    "Writing New Code", 
                     "pie_writing_new_code", 
                     writing_new_code_data,
                     pie_colors
                 ))
-            
+
             # Add Refactoring Code widget
             if 'refactoring_code' in survey_data:
                 refactoring_code_data = [
@@ -52,7 +52,7 @@ def add_experience_widgets(html_content):
                     for label, value in survey_data['refactoring_code'].items()
                 ]
                 widgets_html.append(create_widget_html(
-                    "Experience: Refactoring Code", 
+                    "Refactoring Code", 
                     "pie_refactoring_code", 
                     refactoring_code_data,
                     pie_colors
@@ -65,7 +65,7 @@ def add_experience_widgets(html_content):
                     for label, value in survey_data['writing_tests'].items()
                 ]
                 widgets_html.append(create_widget_html(
-                    "Experience: Writing Tests", 
+                    "Writing Tests", 
                     "pie_writing_tests", 
                     writing_tests_data,
                     pie_colors
@@ -119,7 +119,7 @@ def create_widget_html(title, chart_id, data, colors):
         <div class="donut-chart-container">
             <canvas id="{chart_id}" class="chart-canvas" 
                 data-chart='{json.dumps(data)}'
-                data-options='{json.dumps({"type": "donut", "colors": colors, "isInteger": True})}' style="border: none !important;"
+                data-options='{json.dumps({"type": "donut", "colors": colors, "isInteger": True, "showCenterText": False, "chartStyle": "pie"})}' style="border: none !important;"
                 data-type="donut"></canvas>
         </div>
         <div class="chart-legend donut-legend">'''
