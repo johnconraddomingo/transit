@@ -8,10 +8,10 @@ def generate_dashboard(baseline_dir="baseline", ongoing_dir="ongoing", output_di
     try:
         # Load configuration and data
         config = load_config()
-        baseline_data, time_series_data, average_data = load_all_data(baseline_dir, ongoing_dir)
+        baseline_data, time_series_data, average_data, survey_data = load_all_data(baseline_dir, ongoing_dir)
 
         # Prepare dashboard context
-        context = prepare_dashboard_context(config, baseline_data, time_series_data, average_data)
+        context = prepare_dashboard_context(config, baseline_data, time_series_data, average_data, survey_data)
         context["generation_date"] = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
         # Read static assets and embed them

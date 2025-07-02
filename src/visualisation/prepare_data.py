@@ -1,14 +1,14 @@
 import os
 from datetime import datetime
 from src.utils import encode_image_to_base64
-from visualisation.calculations import (
+from src.visualisation.calculations import (
     calculate_weighted_productivity_index,
     calculate_trend,
     format_value,
     get_trend_color
 )
 
-def prepare_dashboard_context(config, baseline_data, time_series_data, average_data):
+def prepare_dashboard_context(config, baseline_data, time_series_data, average_data, survey_data=None):
     # Encode logo image
     logo_path = os.path.join("images", "suncorp-logo.png")
     logo_base64 = encode_image_to_base64(logo_path)
@@ -162,6 +162,67 @@ def prepare_dashboard_context(config, baseline_data, time_series_data, average_d
     else:
         active_users_data = None
 
+    # Prepare survey data for pie charts if available
+    experience_widgets = []
+    
+    if survey_data:
+        # Colors for the pie charts
+        pie_colors = ["#4E9896", "#FFCD05", "#3498db", "#e67e22", "#9b59b6", "#34495e"]
+        
+        # Create widget for "Writing new code" experience
+        if 'writing_new_code' in survey_data:
+            writing_new_code_data = [
+                {"label": label, "value": value} 
+                for label, value in survey_data['writing_new_code'].items()
+            ]
+            
+            experience_widgets.append({
+                "title": "Experience: Writing New Code",
+                "chart_id": "pie_writing_new_code",
+                "chart_data": writing_new_code_data,
+                "chart_options": {
+                    "type": "donut",
+                    "colors": pie_colors,
+                    "isInteger": True
+                }
+            })
+        
+        # Create widget for "Refactoring existing code" experience
+        if 'refactoring_code' in survey_data:
+            refactoring_code_data = [
+                {"label": label, "value": value} 
+                for label, value in survey_data['refactoring_code'].items()
+            ]
+            
+            experience_widgets.append({
+                "title": "Experience: Refactoring Code",
+                "chart_id": "pie_refactoring_code",
+                "chart_data": refactoring_code_data,
+                "chart_options": {
+                    "type": "donut",
+                    "colors": pie_colors,
+                    "isInteger": True
+                }
+            })
+        
+        # Create widget for "Writing tests" experience
+        if 'writing_tests' in survey_data:
+            writing_tests_data = [
+                {"label": label, "value": value} 
+                for label, value in survey_data['writing_tests'].items()
+            ]
+            
+            experience_widgets.append({
+                "title": "Experience: Writing Tests",
+                "chart_id": "pie_writing_tests",
+                "chart_data": writing_tests_data,
+                "chart_options": {
+                    "type": "donut",
+                    "colors": pie_colors,
+                    "isInteger": True
+                }
+            })
+    
     return {
         "dashboard_title": config.get("dashboard_title", "Dashboard"),
         "logo_base64": logo_base64,
@@ -169,5 +230,7 @@ def prepare_dashboard_context(config, baseline_data, time_series_data, average_d
         "categories": categories,
         "overall_index": productivity_data.get("overall_index", 0),
         "executive_summary_metrics": executive_summary_metrics,
-        "active_users": active_users_data
+        "active_users": active_users_data,
+        "experience_widgets": experience_widgets,
+        "survey_source": survey_data.get("source_file", "") if survey_data else ""
     }

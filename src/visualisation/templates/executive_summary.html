@@ -13,7 +13,7 @@
         <div class="donut-chart-container">
             <canvas id="active_users_donut" class="chart-canvas" data-chart='{{ active_users.chart_data | tojson }}'
                 data-options='{{ active_users.chart_options | tojson }}' data-type="donut"
-                style="border: none;"></canvas>
+                style="border: none !important;"></canvas>
         </div>
     </div>
     {% for metric in executive_summary_metrics %}

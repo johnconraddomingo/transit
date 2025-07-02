@@ -49,6 +49,29 @@
         </div>
     </div>
     {% endfor %}
+
+    {% if experience_widgets %}
+    <!-- Experience survey data from {{ survey_source }} -->
+    {% for widget in experience_widgets %}
+    <div class="executive-summary-metric experience-widget">
+        <div class="metric-title">{{ widget.title }}</div>
+        <div class="donut-chart-container">
+            <canvas id="{{ widget.chart_id }}" class="chart-canvas" data-chart='{{ widget.chart_data | tojson }}'
+                data-options='{{ widget.chart_options | tojson }}' data-type="donut"></canvas>
+        </div>
+        <div class="chart-legend donut-legend">
+            {% for item in widget.chart_data %}
+            <div class="legend-item">
+                <div
+                    style="width: 10px; height: 10px; background-color: {{ widget.chart_options.colors[loop.index0 % widget.chart_options.colors|length] }}; border-radius: 50%; margin-right: 5px;">
+                </div>
+                <span>{{ item.label }} ({{ item.value }})</span>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endfor %}
+    {% endif %}
 </div>
 
 {% for category in categories %}
