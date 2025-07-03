@@ -136,7 +136,6 @@ class SonarQubeDataSource:
             int: Number of vulnerabilities reported by SonarQube
         """
         return self._get_issues(project_key, year, month, "VULNERABILITY")
-   
     def get_coverage(self, project_key, year, month):
         """
         Get the code coverage percentage for a specific project and month.
@@ -154,6 +153,7 @@ class SonarQubeDataSource:
         # Construct API endpoint for measures
         api_endpoint = "/api/measures/component"
         url = urljoin(self.base_url, api_endpoint)
+       
         # Parameters for the API request using query string
         # Get both overall and new code coverage metrics
         params = f'component={project_key}:&metricKeys=coverage,new_coverage&branch=master'
@@ -165,33 +165,30 @@ class SonarQubeDataSource:
             response = requests.get(url_with_params, headers=self.headers, auth=self.auth)
             response.raise_for_status()
             data = response.json()
-
+ 
+            self.logger.debug(3, f"Coverage API response data: {data}")
+           
             # Extract coverage value from response
             measures = data.get('component', {}).get('measures', [])
+            coverage = None
            
-            # Find the coverage metric - first try new_coverage, fallback to overall if not found
-            coverage = next((m.get('value') for m in measures if m.get('metric') == 'new_coverage'), None)
+            # First, try to get new_coverage from the periods array
+            new_coverage_metric = next((m for m in measures if m.get('metric') == 'new_coverage'), None)
            
-            # If new_coverage is not available, we might need to use period parameter
+            if new_coverage_metric and new_coverage_metric.get('periods'):
+                # Get value from the first period
+                coverage = new_coverage_metric.get('periods')[0].get('value')
+                self.logger.debug(3, f"Found new_coverage in periods: {coverage}")
+           
+            # If new_coverage is not available, fall back to overall coverage
             if not coverage:
-                self.logger.info(3, f"New coverage not found in first attempt, trying with period parameter...")
-               
-                # Try again with the period parameter which is needed for new_* metrics
-                params = f'component={project_key}:&metricKeys=new_coverage&branch=master&period=1'
-                url_with_params = f"{url}?{params}"
-                response = requests.get(url_with_params, headers=self.headers, auth=self.auth)
-                response.raise_for_status()
-                data = response.json()
-                measures = data.get('component', {}).get('measures', [])
-                coverage = next((m.get('periods', [{}])[0].get('value') for m in measures if m.get('metric') == 'new_coverage'), None)
+                overall_coverage = next((m.get('value') for m in measures if m.get('metric') == 'coverage'), None)
+                if overall_coverage:
+                    self.logger.info(3, f"Could not find new coverage, falling back to overall coverage: {overall_coverage}")
+                    coverage = overall_coverage
+           
             if coverage:
                 return round(float(coverage) / 100.0, 4)  # Convert from percentage to decimal, round to 4 decimals
-           
-            # If neither new_coverage method worked, fall back to overall coverage
-            overall_coverage = next((m.get('value') for m in measures if m.get('metric') == 'coverage'), None)
-            if overall_coverage:
-                self.logger.info(3, f"Could not find new coverage, falling back to overall coverage: {overall_coverage}")
-                return round(float(overall_coverage) / 100.0, 4)  # Convert from percentage to decimal, round to 4 decimals
             else:
                 self.logger.warning(3, f"No coverage metrics found for project {project_key}")
                 return 0

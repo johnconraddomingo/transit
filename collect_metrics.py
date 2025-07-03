@@ -321,7 +321,7 @@ def main():
  
      # Average code coverage separately using count of scans with actual coverage data
     if coverage_scan_count > 0:
-        consolidated_results['q_coverage'] = round(consolidated_results['q_coverage'] / coverage_scan_count, 2)
+        consolidated_results['q_coverage'] = round(consolidated_results['q_coverage'] / coverage_scan_count, 4)
  
     # Exporting
     logger.info(0, "Exporting Results...")
