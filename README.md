@@ -135,7 +135,10 @@ You'll know the virtual environment is activated when you see `(venv)` at the be
    }
    ```
    
-   > **Note**: For GitHub, token authentication is strongly recommended as username/password authentication is deprecated for the GitHub API. Use a Personal Access Token with the appropriate scopes.
+  > **Note**: For GitHub, token authentication is strongly recommended as username/password authentication is deprecated for the GitHub API. Use a Personal Access Token with the appropriate scopes.
+ 
+  Create a GitHub personal access token (classic) with the following permissions, see https://github.com/settings/tokens:
+  manage_billing:copilot, manage_billing:enterprise, read:audit_log, read:org, read:user
 
 ## Metrics Collection Details
 
