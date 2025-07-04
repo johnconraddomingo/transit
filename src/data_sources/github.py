@@ -288,3 +288,27 @@ class GitHubDataSource:
         except requests.exceptions.RequestException as e:
             self.logger.error(3, f"Error fetching GitHub Copilot AI usage: {e}")
             return 0  # Return 0 if there's an error
+
+    def get_total_seats(self, organization):
+        """
+        Get the total number of Copilot seats for an organization (enterprise).
+
+        Args:
+            organization (str): GitHub organization/enterprise name
+
+        Returns:
+            int: Total number of Copilot seats (total_seats)
+        """
+        api_endpoint = f"/enterprises/{organization}/copilot/billing/seats"
+        url = urljoin(self.base_url, api_endpoint)
+        try:
+            if self.auth:
+                response = requests.get(url, headers=self.headers, auth=self.auth)
+            else:
+                response = requests.get(url, headers=self.headers)
+            response.raise_for_status()
+            data = response.json()
+            return data.get('total_seats', 0)
+        except requests.exceptions.RequestException as e:
+            self.logger.error(3, f"Error fetching GitHub Copilot total seats: {e}")
+            return 0

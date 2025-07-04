@@ -256,34 +256,54 @@ def main():
         logger.info(2, f"✓ Active Users: {active_users}")
     else:
         logger.warning(2, "No active users data available")
-   
+
     ai_usage = collector.collect_metric('ai_usage', org_name, year, month)
     if ai_usage is not None:
         consolidated_results['a_ai_usage'] = ai_usage
         logger.info(2, f"✓ AI Usage: {ai_usage}")
     else:
         logger.warning(2, "No AI usage data available")
-   
+
     code_suggestions = collector.collect_metric('suggested_lines', org_name, year, month)
     if code_suggestions is not None:
         consolidated_results['a_code_suggestions'] = code_suggestions
         logger.info(2, f"✓ Code Suggestions: {code_suggestions}")
     else:
         logger.warning(2, "No code suggestions data available")
-   
+
     code_accepted = collector.collect_metric('accepted_lines', org_name, year, month)
     if code_accepted is not None:
         consolidated_results['a_code_accepted'] = code_accepted
         logger.info(2, f"✓ Code Accepted: {code_accepted}")
     else:
         logger.warning(2, f"No code accepted data available")
-   
+
     ai_adoption_rate = collector.collect_metric('adoption_rate', org_name, year, month)
     if ai_adoption_rate is not None:
         consolidated_results['a_ai_adoption_rate'] = ai_adoption_rate
         logger.info(2, f"✓ AI Adoption Rate: {ai_adoption_rate}")
     else:
         logger.warning(2, "No AI adoption rate data available")
+
+    github_ds = collector.data_sources.get('github')
+    total_seats = None
+    if github_ds:
+        try:
+            total_seats = github_ds.get_total_seats(org_name)           
+            logger.info(2, f"✓ Copilot Total Seats: {total_seats}")
+        except Exception as e:
+            logger.warning(2, f"Error fetching Copilot total seats: {e}")
+    else:
+        logger.warning(2, "GitHub data source not available for total seats")
+
+    if total_seats is not None:
+        all_csv_path = os.path.join(os.path.dirname(__file__), 'ongoing', 'all.csv')
+        try:
+            with open(all_csv_path, 'w', encoding='utf-8', newline='') as f:
+                f.write(f"a_all_users,{total_seats}\n")
+            logger.info(0, f"a_all_users exported to {all_csv_path}")
+        except Exception as e:
+            logger.warning(0, f"Failed to export a_all_users to all.csv: {e}")
    
     # Process survey results
     logger.info(0, "Processing Survey Results")
