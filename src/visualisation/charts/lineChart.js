@@ -59,7 +59,13 @@ window.drawLineGraph = function (canvasId, data, options = {}) {
     }
 
     // Axis mapping
-    const getX = i => padding + (i / (data.length - 1)) * (width - padding * 2);
+    const getX = i => {
+        // Handle single data point case - center it horizontally
+        if (data.length === 1) {
+            return width / 2;
+        }
+        return padding + (i / (data.length - 1)) * (width - padding * 2);
+    };
     const getY = val => height - padding - ((val - minValue) / (maxValue - minValue)) * (height - padding * 2);
 
     // Draw axes
@@ -83,15 +89,17 @@ window.drawLineGraph = function (canvasId, data, options = {}) {
         ctx.setLineDash([]);
     }
 
-    // Draw line
-    ctx.strokeStyle = lineColor;
-    ctx.lineWidth = 2;
-    ctx.beginPath();
-    data.forEach((pt, i) => {
-        const x = getX(i), y = getY(pt.value);
-        i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
-    });
-    ctx.stroke();
+    // Draw line (only if there are multiple points)
+    if (data.length > 1) {
+        ctx.strokeStyle = lineColor;
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        data.forEach((pt, i) => {
+            const x = getX(i), y = getY(pt.value);
+            i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
+        });
+        ctx.stroke();
+    }
 
     // Draw points
     data.forEach((pt, i) => {
