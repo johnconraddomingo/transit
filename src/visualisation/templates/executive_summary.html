@@ -7,7 +7,8 @@
         <div class="metric-title">Number of Active Users</div>
         {% if active_users.trend %}
         <div class="metric-trend" style="background-color: {{ active_users.trend.color }};">
-            {{ active_users.trend.pct }} {{ active_users.trend.arrow }} ({{ active_users.trend.description }})
+            {{ active_users.trend.pct }} <i class="{{ active_users.trend.arrow }}"></i> ({{
+            active_users.trend.description }})
         </div>
         {% endif %}
         <div class="donut-chart-container">
@@ -22,7 +23,7 @@
 
         {% if metric.trend %}
         <div class="metric-trend" style="background-color: {{ metric.trend.color }};">
-            {{ metric.trend.pct }} {{ metric.trend.arrow }} ({{ metric.trend.description }})
+            {{ metric.trend.pct }} <i class="{{ metric.trend.arrow }}"></i> ({{ metric.trend.description }})
         </div>
         {% endif %}
         <div class="chart-container">

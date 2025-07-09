@@ -69,34 +69,35 @@ class ExcelDataSource:
             # Excel uses 0-based indices internally, so we need to convert letter-based column references
             # Map Excel column letters to 0-based indices
             col_to_idx = {
-                'G': 6, # Column G is the 7th column (0-indexed)
+                'G': 6,  # Column G is the 7th column (0-indexed)
+                'Q': 16, # Column Q is the 17th column (0-indexed)
+                'S': 18, # Column S is the 19th column (0-indexed)
                 'T': 19, # Column T is the 20th column (0-indexed)
                 'U': 20, # Column U is the 21st column (0-indexed)
                 'V': 21, # Column V is the 22nd column (0-indexed)
-                'Y': 24, # Column Y is the 25th column (0-indexed)
             }
             
             # Count fields in column Y that contain "Very disappointed" for user_satisfaction
             user_satisfaction_count = 0
-            y_idx = col_to_idx['Y']
-            if y_idx < len(df.columns):
-                user_satisfaction_count = df.iloc[:, y_idx].astype(str).str.contains('Very disappointed', case=False, na=False).sum()
-                logger.info(3, f"Found {user_satisfaction_count} 'Very disappointed' responses in column Y (index {y_idx})")
+            q_idx = col_to_idx['Q']
+            if q_idx < len(df.columns):
+                user_satisfaction_count = df.iloc[:, q_idx].astype(str).str.contains(r'\b[45]\b', case=False, na=False).sum()
+                logger.info(3, f"Found {user_satisfaction_count} responses containing '4' or '5' in column Q (index {q_idx})")
             else:
-                logger.warning(3, f"Column Y (index {y_idx}) not found in survey results with {len(df.columns)} columns")
-            
-            # Count fields in column G that contain "Almost always" for adoption
+                logger.warning(3, f"Column Q (index {q_idx}) not found in survey results with {len(df.columns)} columns")
+
+            # Count fields in column G that contain "Frequently (70+%)" for adoption
             adoption_count = 0
             g_idx = col_to_idx['G']
             if g_idx < len(df.columns):
-                adoption_count = df.iloc[:, g_idx].astype(str).str.contains('Almost always', case=False, na=False).sum()
-                logger.info(3, f"Found {adoption_count} 'Almost always' responses in column G (index {g_idx})")
+                adoption_count = df.iloc[:, g_idx].astype(str).str.contains('Frequently (70+%)', case=False, na=False).sum()
+                logger.info(3, f"Found {adoption_count} 'Frequently (70+%)' responses in column G (index {g_idx})")
             else:
                 logger.warning(3, f"Column G (index {g_idx}) not found in survey results with {len(df.columns)} columns")
             
-            # Count fields in columns T, U and V that contain "Strongly agree" for productivity
+            # Count fields in columns S, T, U and V that contain "Strongly agree" for productivity
             productivity_count = 0
-            for col, idx in {'T': col_to_idx['T'], 'U': col_to_idx['U'], 'V': col_to_idx['V']}.items():
+            for col, idx in {'S': col_to_idx['S'], 'T': col_to_idx['T'], 'U': col_to_idx['U'], 'V': col_to_idx['V']}.items():
                 if idx < len(df.columns):
                     col_count = df.iloc[:, idx].astype(str).str.contains('Strongly agree', case=False, na=False).sum()
                     productivity_count += col_count

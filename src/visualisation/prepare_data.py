@@ -1,4 +1,5 @@
 import os
+ 
 from datetime import datetime
 from src.utils import encode_image_to_base64
 from src.visualisation.calculations import (
@@ -7,6 +8,15 @@ from src.visualisation.calculations import (
     format_value,
     get_trend_color
 )
+
+def get_active_users_total():
+    all_csv_path = os.path.join("ongoing", "all.csv")
+    try:
+        with open(all_csv_path, "r", encoding="utf-8") as f:
+            header, value = f.readline().strip().split(",")
+            return int(value)
+    except Exception:
+        return 5000  # Default fallback
 
 def prepare_dashboard_context(config, baseline_data, time_series_data, average_data, survey_data=None):
     # Encode logo image
@@ -72,7 +82,7 @@ def prepare_dashboard_context(config, baseline_data, time_series_data, average_d
             raw_weight = meta.get("weight", 0)
             category_weight = config.get("category_weights", {}).get(meta.get("category", ""), 0)
             global_weight = raw_weight * category_weight
-            weight_pct = f"{global_weight * 100:.1f}%" if global_weight else "—"
+            weight_pct = f"{global_weight * 100:.1f}%" if global_weight else "-"
 
             # Chart options including baseline reference
             chart_options = {
@@ -94,13 +104,13 @@ def prepare_dashboard_context(config, baseline_data, time_series_data, average_d
                 if average_val == baseline_val:
                     trend = {
                         "pct": "0.0%",
-                        "arrow": "—",
+                        "arrow": 'fas fa-minus',
                         "description": "No Change",
                         "color": "#808080"  # Neutral gray color for no change
                     }
                 else:
                     pct = calculate_trend(average_val, baseline_val)
-                    arrow = "▲" if pct > 0 else "▼"
+                    arrow = 'fas fa-caret-up' if pct > 0 else 'fas fa-caret-down'
                     better = "Better" if (pct > 0 and not is_inverse) or (pct < 0 and is_inverse) else "Worse"
                     trend = {
                         "pct": f"{abs(pct):.1f}%",
@@ -141,7 +151,7 @@ def prepare_dashboard_context(config, baseline_data, time_series_data, average_d
 
     # Prepare active users data for donut chart
     active_users_metric = next((metric for cat in categories for metric in cat["metrics"] if metric["key"] == "a_active_users"), None)
-    active_users_total = 5000  # From all.csv
+    active_users_total = get_active_users_total()
     if active_users_metric:
         current_value = int(active_users_metric["current"].replace(",", "")) if active_users_metric["current"] != "N/A" else 0
         active_users_data = {

@@ -175,13 +175,13 @@
                 <td>{{ metric.current }}</td>
                 <td>{{ metric.average }}</td>
                 <td>{{ metric.trend.pct if metric.trend else 'N/A' }}</td>
-                <td>{{ metric.chart_options.weight_pct if metric.chart_options.weight_pct is defined else '—' }}
+                <td>{{ metric.chart_options.weight_pct if metric.chart_options.weight_pct is defined else '-' }}
                 </td>
                 <td>
                     {% if metric.index_input is defined and metric.index_input != 0 %}
                     {{ "%.2f%%"|format(metric.index_input) }}
                     {% else %}
-                    —
+                    -
                     {% endif %}
                 </td>
             </tr>

@@ -13,7 +13,7 @@
 
             {% if metric.trend %}
             <div class="metric-trend" style="background-color: {{ metric.trend.color }};">
-                {{ metric.trend.pct }} {{ metric.trend.arrow }} ({{ metric.trend.description }})
+                {{ metric.trend.pct }} <i class="{{ metric.trend.arrow }}"></i> ({{ metric.trend.description }})
             </div>
             {% endif %}
 

@@ -121,11 +121,11 @@ window.drawLineGraph = function (canvasId, data, options = {}) {
 
     // Draw Y-axis labels
     if (options.isPercentage) {
-        drawYAxisLabelsPercentage(ctx, getY, minValue, maxValue, padding, textColor);
+        drawYAxisLabelsPercentage(ctx, getY, minValue, maxValue, padding, textColor, height);
     } else if (options.isInteger) {
-        drawYAxisLabelsInteger(ctx, getY, minValue, maxValue, padding, textColor);
+        drawYAxisLabelsInteger(ctx, getY, minValue, maxValue, padding, textColor, height);
     } else {
-        drawYAxisLabelsFloat(ctx, getY, minValue, maxValue, padding, textColor, options.decimals || 2);
+        drawYAxisLabelsFloat(ctx, getY, minValue, maxValue, padding, textColor, options.decimals || 2, height);
     }
 
     // Tooltip logic

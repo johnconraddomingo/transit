@@ -27,42 +27,42 @@
       "category": "Adoption",
       "format": "number",
       "weight": 0.25,
-      "description": "Gets the maximum total_active_users from the GitHub Copilot API."
+      "description": "The maximum number of engineers who have used GitHub Copilot in the last 90 days<br/><b>Source: GitHub</b>"
     },
     "a_ai_adoption_rate": {
       "label": "AI Adoption Rate",
       "category": "Adoption",
       "format": "percentage",
       "weight": 0.25,
-      "description": "The average of the total accepted divided by suggested lines from the GitHub Copilot API."
+      "description": "The percentage of code lines accepted compared to lines suggested<br/><b>Source: GitHub</b>"
     },
     "a_ai_usage": {
       "label": "AI Usage",
       "category": "Adoption",
-      "format": "percentage",
+      "format": "number",
       "weight": 0.25,
-      "description": "Sums the total_chats from the GitHub Copilot API."
+      "description": "The number of times engineers used Copilot Chat<br/><b>Source: GitHub</b>"
     },
     "a_code_suggestions": {
-      "label": "Code Lines Suggested by Copilot",
+      "label": "Code Lines Suggested",
       "category": "Adoption",
       "format": "number",
       "weight": 0.125,
-      "description": "Sums the total_code_lines_suggested from the GitHub Copilot API."
+      "description": "Total number of code lines suggested<br/><b>Source: GitHub</b>"
     },
     "a_code_accepted": {
-      "label": "Code Lines Accepted from Copilot",
+      "label": "Code Lines Accepted",
       "category": "Adoption",
       "format": "number",
       "weight": 0.125,
-      "description": "Sums the total_code_lines_accepted from the GitHub Copilot API."
+      "description": "Total number of code lines accepted<br/><b>Source: GitHub</b>"
     },
     "s_merged_prs": {
       "label": "Number of Merged PRs",
       "category": "Speed",
       "format": "number",
       "weight": 0.34,
-      "description": "Represents the total number of merged pull requests from BitBucket."
+      "description": "Total pull requests merged<br/><b>Source: BitBucket</b>"
     },
     "s_pr_review_time": {
       "label": "Avg PR Review Time (Mins)",
@@ -70,14 +70,14 @@
       "format": "number",
       "inverse": true,
       "weight": 0.33,
-      "description": "Measures the average time taken to review pull requests (in minutes) from BitBucket."
+      "description": "Average time from pull request creation to the first approval of merged pull requests<br/><b>Source: BitBucket</b>"
     },
     "s_story_points": {
       "label": "Story Points (Squad Level)",
       "category": "Speed",
       "format": "number",
       "weight": 0.33,
-      "description": "Tracks the total story points completed per Project."
+      "description": "Story Points closed<br/><b>Source: Jira</b>"
     },
     "q_code_smells": {
       "label": "Code Quality / Code Smells",
@@ -85,14 +85,14 @@
       "format": "number",
       "inverse": true,
       "weight": 0.25,
-      "description": "Total number of Code Smells identified via SonarQube for the given month"
+      "description": "The total number of quality issues identified by SonarQube<br/><b>Source: SonarQube</b>"
     },
     "q_coverage": {
       "label": "Unit Test Coverage",
       "category": "Quality",
       "format": "percentage",
       "weight": 0.25,
-      "description": "Represents the latest percentage of code covered by unit tests via SonarQube for the given month."
+      "description": "The percentage of code that is tested by unit tests<br/><b>Source: SonarQube</b>"
     },
     "q_bugs": {
       "label": "Bugs",
@@ -100,7 +100,7 @@
       "format": "number",
       "inverse": true,
       "weight": 0.25,
-      "description": "Total number of Bugs identified via SonarQube for the given month"
+      "description": "The total number of bugs identified by SonarQube<br/><b>Source: SonarQube</b>"
     },
     "q_vulnerabilities": {
       "label": "Vulnerabilities",
@@ -108,42 +108,35 @@
       "format": "number",
       "inverse": true,
       "weight": 0.25,
-      "description": "Total number of Vulnerabilities identified via SonarQube for the given month"
+      "description": "The total number of vulnerabilities identified by SonarQube<br/><b>Source: SonarQube</b>"
     },
     "e_user_satisfaction": {
       "label": "User Satisfaction",
       "category": "Experience",
       "format": "percentage",
-      "weight": 0.25,
-      "description": "Measures the percentage of users satisfied with the platform."
+      "weight": 0.33,
+      "description": "The percentage of users that are Satisfied or Very Satisfied<br/><b>Source: Survey</b>"
     },
     "e_adoption": {
       "label": "Adoption & Frequency",
       "category": "Experience",
       "format": "percentage",
-      "weight": 0.25,
-      "description": "Tracks the frequency and adoption rate of the platform's features."
+      "weight": 0.33,
+      "description": "The percentage of users who use GitHub Copilot frequently<br/><b>Source: Survey</b>"
     },
     "e_productivity": {
       "label": "Productivity, Quality & Benefits Sentiments",
       "category": "Experience",
       "format": "percentage",
-      "weight": 0.25,
-      "description": "Represents user sentiments regarding productivity, quality, and benefits."
-    },
-    "e_use_cases": {
-      "label": "Use Cases",
-      "category": "Experience",
-      "format": "number",
-      "weight": 0.25,
-      "description": "Counts the number of distinct use cases implemented by users."
+      "weight": 0.33,
+      "description": "The percentage of users who strongly agree that they are more confident in in their quality of work, that they complete tasks faster, learn from suggestions and/or save brainpower in repetitive tasks<br/><b>Source: Survey</b>"
     },
     "d_deployment_frequency": {
       "label": "Deployment Frequency",
       "category": "Delivery",
       "format": "number",
       "weight": 1.0,
-      "description": "The total number of pipeline runs for the selected projects."
+      "description": "Number of times code is deployed to production<br/><b>Source: Jenkins</b>"
     }
   }
 }
