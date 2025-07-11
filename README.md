@@ -170,16 +170,15 @@ The application collects metrics from different data sources using their respect
 
 > The Experience Metrics generates the content based on the exported survey results. Place these GitHub Copilot Experience Feedback file and rename it accordingly based on the YYYY-MM.xlsx format from when it was generated and then place it on the same `ongoing` folder
 
-- `e_user_satisfaction`: Generated from the YYYY-MM.xlsx file survey result using Column Y. Getting the percentage of "Very disappointed"
-    - Question: How would you feel if you could no longer use GitHub Copilot? 
-- `e_adoption`: Generated from the YYYY-MM.xlsx file survey result using Column G. Getting the percentage of "Almost Always"
-    - Question: When you are coding, how often do you use GitHub Copilot? 
-- `e_productivity`: Generated from the YYYY-MM.xlsx file survey result using Columns T, U and V. Getting the percentage of "Strongly agree"
-    - Question: Complete tasks faster 
-    - Question: Learn from suggestions 
-    - Question: Save brainpower on repetitive tasks 
-    
-- `e_use_cases`: Manually added from survey results
+- `e_user_satisfaction`: Generated from the YYYY-MM.xlsx file survey result using Column Q. Getting the percentage of 5 (Very Satisfied) and 4 (Satisfied)
+    - Question: Overall, how satisfied are you with your experience using GitHub Copilot? 
+- `e_adoption`: Generated from the YYYY-MM.xlsx file survey result using Column G. Getting the percentage of "Frequently (70+%)"
+    - Question: How often do you use GitHub Copilot in your work?
+- `e_productivity`: Generated from the YYYY-MM.xlsx file survey result using Columns S, T, U and V. Getting the percentage of "Strongly agree"
+    - Question: Feel more confident in the quality of my work
+    - Question: Complete tasks faster
+    - Question: Learn from suggestions
+    - Question: Save brainpower on repetitive tasks
 
 All API endpoints support both token-based and username/password authentication. Each request includes appropriate date filters (start/end) based on the specified year and month.
 
@@ -191,7 +190,7 @@ The executive summary includes:
 - Overall productivity index
 - Experience widgets showing survey data from Excel files (Writing New Code, Refactoring Code, Writing Tests)
 
-Inside the ``ongoing/all.csv`` contains a configuration of the total number of employees used to build the Number of Active Users Donut chart
+Inside the ``ongoing/all.csv`` contains a configuration of the total number of employees used to build the Number of Active Users Donut chart. It is added via the GitHub datasource call
 ```
 a_all_users,5000
 ```
@@ -313,7 +312,6 @@ q_vulnerabilities,92
 e_user_satisfaction,0.60
 e_adoption,0.22
 e_productivity,0.55
-e_use_cases,8
 d_deployment_frequency,2
 ```
 

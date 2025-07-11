@@ -45,56 +45,63 @@ class SonarQubeDataSource:
             self.auth = (username, password)
         else:
             raise ValueError("Either token or username/password must be provided for authentication")
-   
+     
     def _get_issues(self, project_key, year, month, issue_type):
         """
         Private helper method to get the number of issues of a specific type for a project and month.
-       
+
         Args:
             project_key (str): SonarQube project key
             year (str): Year (e.g. "2025")
             month (str): Month (e.g. "05")
             issue_type (str): Type of issue (BUG, CODE_SMELL, VULNERABILITY)
-           
+        
         Returns:
             int: Number of issues reported by SonarQube
         """
         # Calculate start and end dates for the month
         year_int = int(year)
         month_int = int(month)
-       
+
         # Get the last day of the month
         _, last_day = calendar.monthrange(year_int, month_int)
-       
+
         # Format dates for the API
         from_date = f"{year}-{month}-01"
         # Add one day to last_day to make to_date inclusive
         to_date_dt = datetime(year_int, month_int, last_day) + timedelta(days=1)
         to_date = to_date_dt.strftime("%Y-%m-%d")
-       
+
         # Construct API endpoint for issues
         api_endpoint = "/api/issues/search"
         url = urljoin(self.base_url, api_endpoint)
- 
+
         # Parameters for the API request
-        # Queries all statuses on all branches for the given date range
-        params = f'componentKeys={project_key}:&types={issue_type}&ps=1&facets=types&createdAfter={from_date}&createdBefore={to_date}'
- 
+        # Add date filter to get unresolved issues created within the specified month
+        params = f'componentKeys={project_key}&types={issue_type}&ps=1&createdAfter={from_date}&createdBefore={to_date}&resolved=false'
+
+        self.logger.info(3, f"Searching for {issue_type} issues created between {from_date} and {to_date} for project {project_key}")
+
         try:
             # Convert params to query string and append to URL
-            url_with_params = f"{url}?{params}"
+            url_with_params = f"{url}?{params}" 
+        
             # Make request with params in URL
             response = requests.get(url_with_params, headers=self.headers, auth=self.auth)
             response.raise_for_status()
             data = response.json()
-             
+            
+            total_issues = data.get('total', 0)
+            self.logger.info(3, f"Found {total_issues} {issue_type} issues for project {project_key}")
+            
             # Return the count of issues
-            return data.get('total', 0)
-           
+            return total_issues
+        
         except requests.exceptions.RequestException as e:
             self.logger.error(3, f"Error fetching {issue_type} from SonarQube: {e}")
             return 0
-   
+
+
     def get_bugs(self, project_key, year, month):
         """
         Get the number of bugs for a specific project and month.
